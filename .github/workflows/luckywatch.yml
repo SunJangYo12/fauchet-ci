@@ -76,6 +76,7 @@ jobs:
           PID_NC=$!
 
           mkdir out
+          echo "============== start ============"
 
           bash setconfig.sh "$COOKIE"
 

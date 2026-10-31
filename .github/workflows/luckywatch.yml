@@ -131,6 +131,8 @@ jobs:
     permissions:
       actions: write
     steps:
+      - uses: actions/checkout@v4
+
       - name: Tunggu 5 jam
         run: sleep 18000   # 5 jam
 

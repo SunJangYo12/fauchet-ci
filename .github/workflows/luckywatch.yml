@@ -10,7 +10,7 @@ name: luckywatch pro
 on:
   workflow_dispatch:
   push:
-    branches: [master]
+    branches: [main]
     paths:
       - ".github/workflows/luckywatch.yml"
   schedule:
@@ -101,7 +101,8 @@ EOF
             pip3 install pillow
             pip3 install pypng
 
-            timeout 18000 python3 luckywatch.py | tee out/log.txt
+            DUR=120 #18000
+            timeout $DUR python3 luckywatch.py | tee out/log.txt
           '
           sudo chmod 777 -R out
 

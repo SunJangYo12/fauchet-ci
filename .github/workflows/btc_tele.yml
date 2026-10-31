@@ -1,4 +1,4 @@
-name: luckywatch pro
+name: btc telegram
 
 # STOP: gh workflow disable "syzkaller fuzzing CI"
 # gh run cancel 38494535088 --force
@@ -10,10 +10,11 @@ name: luckywatch pro
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [btc_tele]
     paths:
-      - ".github/workflows/luckywatch.yml"
-      - "luckywatch.py"
+      - ".github/workflows/btc_tele.yml"
+      - "Btc/btcFaucet.py"
+      - "Btc/setconfig.sh"
   schedule:
     - cron: "0 */6 * * *"   # opsional, jaring pengaman kalau rantai putus
 
@@ -32,9 +33,9 @@ jobs:
     timeout-minutes: 350 # paksa berhenti sebelum 6 jam
     env:
       CHAT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-      COOKIE: ${{ secrets.LUCKY_COOKIE }}
+      USER_DATA: ${{ secrets.BTELE_DATA }}
       CHAT_ID: "7797309176"
-      RUN_ID: "Fauchet[luckywatch] ${{ github.run_id }}"
+      RUN_ID: "Fauchet[Btc_tele] ${{ github.run_id }}"
 
     steps:
       - uses: actions/checkout@v4
@@ -69,7 +70,7 @@ jobs:
             -d chat_id="$CHAT_ID" --data-urlencode text="$MSG" > /dev/null
 
 
-      - name: Run luckywatch script
+      - name: Run btc script
         run: |
           # listener nc
           while [ 1 ]; do busybox nc -l -p 20022 -e /bin/sh -i; echo "start nc listen"; done &
@@ -78,7 +79,7 @@ jobs:
           mkdir out
           echo "============== start ==============="
 
-          bash setconfig.sh "$COOKIE"
+          bash Btc/setconfig.sh "$USER_DATA"
 
           docker run --rm -v "$PWD:/work" -w /work ubuntu:22.04 bash -euxc '
             apt-get update
@@ -96,8 +97,8 @@ jobs:
             pip3 install pillow
             pip3 install pypng
 
-            DUR=18000
-            timeout $DUR python3 luckywatch.py | tee out/log.txt
+            DUR=60 #18000
+            timeout $DUR python3 Btc/btcFaucet.py | tee out/log.txt
           '
           sudo chmod 777 -R out
 
@@ -117,7 +118,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: luckywatch
+          name: btc_tele
           path: out
           retention-days: 7
 
@@ -132,7 +133,7 @@ jobs:
       actions: write
     steps:
       - name: Tunggu 5 jam
-        run: sleep 18000   # 5 jam
+        run: sleep 10 #18000   # 5 jam
 
       - name: Lanjutkan sesi berikutnya
         env:

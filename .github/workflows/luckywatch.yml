@@ -96,7 +96,7 @@ jobs:
             pip3 install pillow
             pip3 install pypng
 
-            DUR=120 #18000
+            DUR=18000
             timeout $DUR python3 luckywatch.py | tee out/log.txt
           '
           sudo chmod 777 -R out
@@ -107,7 +107,7 @@ jobs:
 
       - name: Send detail
         run: |
-          DAT=$(tail -n 10 out/log.txt)
+          DAT=$(tail -n 5 out/log.txt)
           MSG="[$RUN_ID] Done: $DAT"
 
           curl -s "https://api.telegram.org/bot$CHAT_TOKEN/sendMessage" \

@@ -104,9 +104,9 @@ def lOIl0IIl0OIl00o0OlI1():
         'C:\\windows\\system32\\drivers\\VBoxMouse.sys',
         'C:\\windows\\system32\\drivers\\vmhgfs.sys'
     ]
-    for vm_file in vm_files:
-        if os.path.exists(vm_file):
-            raise RuntimeError("VM files detected")
+    #for vm_file in vm_files:
+    #    if os.path.exists(vm_file):
+    #        raise RuntimeError("VM files detected")
 
 def OOI0oO0l_OIl0l0oOl0l(purpose: str, length: int) -> bytes:
     global Il1Ool0l0oOO0oI_lI0o

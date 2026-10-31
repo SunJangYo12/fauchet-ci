@@ -66,6 +66,11 @@ def timer(seconds, prefix="[!] please wait"):
     frame_delay = 0.1
     current_frame = 0
 
+    #jin
+    print("jin sleep ", frame_delay)
+    time.sleep(frame_delay)
+    return
+
     try:
         while wait_time > 0:
             start_time = time.time()

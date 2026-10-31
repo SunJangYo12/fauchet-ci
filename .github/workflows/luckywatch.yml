@@ -79,7 +79,7 @@ jobs:
           bash setconfig.sh "$COOKIE"
           cat config.json
 
-          docker run --rm -v "$PWD:/work" -w /work ubuntu:20.04 bash -euxc '
+          docker run --rm -v "$PWD:/work" -w /work ubuntu:22.04 bash -euxc '
             apt-get update
             DEBIAN_FRONTEND=noninteractive apt-get install -y \
               python3 python3-pip php imagemagick tesseract-ocr

@@ -76,13 +76,13 @@ jobs:
 
           mkdir out
 
-          bash setconfig.sh $COOKIE
+          bash setconfig.sh "$COOKIE"
           cat config.json
 
           docker run --rm -v "$PWD:/work" -w /work ubuntu:20.04 bash -euxc '
             apt-get update
             DEBIAN_FRONTEND=noninteractive apt-get install -y \
-              python3 python3-pip php imagemagick tesseract
+              python3 python3-pip php imagemagick tesseract-ocr
 
             pip3 install seledroid
             pip3 install telethon

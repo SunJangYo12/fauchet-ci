@@ -66,6 +66,7 @@ def timer(seconds, prefix="[!] please wait"):
     frame_delay = 0.1
     current_frame = 0
 
+    time.sleep(frame_delay)
     return
 
     try:

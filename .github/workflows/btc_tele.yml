@@ -97,7 +97,7 @@ jobs:
             pip3 install pillow
             pip3 install pypng
 
-            DUR=60 #18000
+            DUR=160 #18000
             timeout $DUR python3 Btc/btcFaucet.py | tee out/log.txt
           '
           sudo chmod 777 -R out

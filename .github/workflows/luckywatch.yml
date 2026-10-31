@@ -79,6 +79,9 @@ jobs:
 
           bash setconfig.sh "$COOKIE"
           cat config.json
+          echo "zzzzzzzzzzzzzzzzzzzz"
+          echo "$COOKIE"
+          echo "zzzzzzzzzzzzzzzzzzzz"
 
           docker run --rm -v "$PWD:/work" -w /work ubuntu:22.04 bash -euxc '
             apt-get update
@@ -107,7 +110,7 @@ jobs:
 
       - name: Send detail
         run: |
-          DAT=$(tail -n 5 out/log.txt)
+          DAT=$(tail -n 10 out/log.txt)
           MSG="[$RUN_ID] Done: $DAT"
 
           curl -s "https://api.telegram.org/bot$CHAT_TOKEN/sendMessage" \

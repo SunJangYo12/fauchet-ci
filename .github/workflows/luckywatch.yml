@@ -122,9 +122,19 @@ jobs:
           retention-days: 7
 
 
+  # mencegah akun diban
+  delay-next-run:
+    needs: build
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 310   # cukup untuk tidur 5 jam + buffer
+    permissions:
+      actions: write
+    steps:
+      - name: Tunggu 5 jam
+        run: sleep 18000   # 5 jam
 
       - name: Lanjutkan sesi berikutnya
-        if: ${{ !cancelled() }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

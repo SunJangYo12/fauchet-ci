@@ -14,8 +14,6 @@ on:
     paths:
       - ".github/workflows/luckywatch.yml"
       - "luckywatch.py"
-  schedule:
-    - cron: "0 */6 * * *"   # opsional, jaring pengaman kalau rantai putus
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

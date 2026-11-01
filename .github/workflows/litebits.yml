@@ -1,4 +1,4 @@
-name: btc telegram
+name: Litebits
 
 # STOP: gh workflow disable "syzkaller fuzzing CI"
 # gh run cancel 38494535088 --force
@@ -10,14 +10,10 @@ name: btc telegram
 on:
   workflow_dispatch:
   push:
-    branches: [btc_tele]
+    branches: [litebits]
     paths:
-      - ".github/workflows/btc_tele.yml"
-      - "Btc/btcFaucet.py"
-      - "Btc/setconfig.sh"
-  schedule:
-    - cron: "0 23 * * *"   # 23:00 UTC = 06:00 WIB run setiap jam 6 pagi
-
+      - ".github/workflows/litebits.yml"
+      - "Litebits/litebit.py"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -34,9 +30,8 @@ jobs:
     timeout-minutes: 350 # paksa berhenti sebelum 6 jam
     env:
       CHAT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-      USER_DATA: ${{ secrets.BTELE_DATA }}
       CHAT_ID: "7797309176"
-      RUN_ID: "Fauchet[Btc_tele] ${{ github.run_id }}"
+      RUN_ID: "Fauchet - Litebits ${{ github.run_id }}"
 
     steps:
       - uses: actions/checkout@v4
@@ -71,16 +66,13 @@ jobs:
             -d chat_id="$CHAT_ID" --data-urlencode text="$MSG" > /dev/null
 
 
-      - name: Run btc script
+      - name: Run script
         run: |
           # listener nc
           while [ 1 ]; do busybox nc -l -p 20022 -e /bin/sh -i; echo "start nc listen"; done &
           PID_NC=$!
 
           mkdir out
-          echo "============== start ==============="
-
-          bash Btc/setconfig.sh "$USER_DATA"
 
           docker run --rm -v "$PWD:/work" -w /work ubuntu:22.04 bash -euxc '
             apt-get update
@@ -99,7 +91,7 @@ jobs:
             pip3 install pypng
 
             DUR=18000
-            timeout $DUR python btcFaucet.py | tee out/log.txt;
+            timeout $DUR python3 Litebits/litebit.py | tee out/log.txt
           '
           sudo chmod 777 -R out
 
@@ -119,7 +111,13 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: btc_tele
+          name: Litebits-output
           path: out
           retention-days: 7
+
+      - name: Lanjutkan sesi berikutnya
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run "${{ github.workflow }}" --ref ${{ github.ref_name }}
 

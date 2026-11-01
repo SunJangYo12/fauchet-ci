@@ -16,7 +16,8 @@ on:
       - "Btc/btcFaucet.py"
       - "Btc/setconfig.sh"
   schedule:
-    - cron: "0 */6 * * *"   # opsional, jaring pengaman kalau rantai putus
+    - cron: "0 23 * * *"   # 23:00 UTC = 06:00 WIB run setiap jam 6 pagi
+
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -122,8 +123,3 @@ jobs:
           path: out
           retention-days: 7
 
-      - name: Lanjutkan sesi berikutnya
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh workflow run "${{ github.workflow }}" --ref ${{ github.ref_name }}

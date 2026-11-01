@@ -99,7 +99,7 @@ jobs:
             pip3 install pypng
 
             DUR=18000
-            timeout $DUR while [ 1 ]; do python btcFaucet.py | tee out/log.txt; sleep 320; done
+            timeout $DUR python btcFaucet.py | tee out/log.txt;
           '
           sudo chmod 777 -R out
 

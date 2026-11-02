@@ -10,7 +10,7 @@ name: Litebits
 on:
   workflow_dispatch:
   push:
-    branches: [litebits]
+    branches: [litebitszz]
     paths:
       - ".github/workflows/litebits.yml"
       - "Litebits/litebit.py"
@@ -29,8 +29,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 350 # paksa berhenti sebelum 6 jam
     env:
-      CHAT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-      CHAT_ID: "7797309176"
+      CHAT_TOKEN: ${{ secrets.TELE_FAUCHET_LITEBITS }}
+      CHAT_ID: ${{ secrets.TELE_CHATID_FAUCHET_LITEBITS }}
       RUN_ID: "Fauchet - Litebits ${{ github.run_id }}"
 
     steps:

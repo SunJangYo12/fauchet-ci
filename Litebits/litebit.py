@@ -380,6 +380,7 @@ class LiteBitsTeleBot:
         except Exception:
             return 0
 
+
     async def extract_init_data_async(self):
         if not HAS_TELETHON:
             return None
@@ -472,6 +473,40 @@ class LiteBitsTeleBot:
                 self.validate_telegram_auth()
         return True
 
+
+    async def refresh_init_data_async(self):
+        session_path = os.path.join(self.base_dir, 'session_auth')
+        client = TelegramClient(session_path, API_ID, API_HASH)
+        await client.connect()
+        try:
+            if not await client.is_user_authorized():
+                return None   # session mati, jangan minta OTP
+            bot = await client.get_input_entity(self.bot_username)
+            res_app = await client(functions.messages.RequestAppWebViewRequest(
+                peer=bot,
+                app=types.InputBotAppShortName(bot_id=bot, short_name='app'),
+                platform='android', write_allowed=True,
+                start_param=REFERRAL_CODE))
+            parsed = urllib.parse.urlparse(res_app.url)
+            params = urllib.parse.parse_qs(parsed.fragment or parsed.query)
+            return params.get('tgWebAppData', [None])[0]
+        except Exception as e:
+            self.add_log('err', f"Refresh gagal: {e!r}")
+            return None
+        finally:
+            await client.disconnect()
+
+    def refresh_auth(self):
+        self.auth_token = ""
+        if self.init_data and self.validate_telegram_auth():
+            return True
+        new = asyncio.run(self.refresh_init_data_async())
+        if new:
+            self.init_data = new
+            self.save_config()
+            return self.validate_telegram_auth()
+        return False
+
     def do_claim_flow(self):
         self.add_log('info', f"Holding button ({HOLD_DURATION}s)...")
         self._progress_wait(HOLD_DURATION, label="HOLD")
@@ -482,7 +517,16 @@ class LiteBitsTeleBot:
         self.add_log('net', "Initializing claim on server...")
         try:
             r_start = self.session.post(f"{BASE_URL}/api/claim/start", json={}, timeout=15)
+
+            self.add_log('info', r_start)
+            if r_start.status_code in (401, 403):
+                self.add_log('warn', "Auth ditolak server")
+                if self.refresh_auth():
+                    return False, "reauth"   # ulangi tanpa menghitung gagal
+                self.running = False         # berhenti kalau memang tidak bisa pulih
+                return False, "auth_failed"
             start_data = r_start.json()
+
         except Exception as e:
             self.add_log('err', f"Network error: {e}")
             self.cycles_failed += 1

@@ -39,7 +39,7 @@ jobs:
     env:
       WORK: /home/runner/vm
       MODE: ${{ inputs.mode }}
-      WHORUN: "$MODE-loop(${{ inputs.mode }})"
+      WHORUN: "${{ inputs.mode }}-loop(${{ inputs.mode }})"
     steps:
       - name: Hitung hari (WIB)
         id: day
@@ -213,7 +213,7 @@ jobs:
             sleep 5
             type_text "source myenv/bin/activate"
             key ret                 # Enter
-            type_text "python btc_faucet/gabung.py"
+            type_text "python fauchet-ci/Btc/gabung.py"
             key ret                 # Enter
           fi
 
@@ -224,8 +224,7 @@ jobs:
           alive() { pgrep -x qemu-system-x86 > /dev/null; }
 
           # tunggu kamu shutdown dari dalam VM (maks 4,5 jam, sisakan waktu untuk kompres + upload)
-          #for i in $(seq 1 1620); do
-          for i in $(seq 1 320); do
+          for i in $(seq 1 1620); do
             alive || break
             sleep 10
           done

@@ -25,9 +25,9 @@ concurrency:
   group: xubuntu-vm
   cancel-in-progress: false
 
-# gh workflow run build.yml -f mode=install --ref ci-boot-xubuntu22 NOTE: setelah selsai tekan shutdown klik enter
-# gh workflow run build.yml --ref ci-boot-xubuntu22 -f mode=boot -f save=true                NOTE: boot untuk modifikasi image dan keluar
-# gh workflow run build.yml --ref ci-boot-xubuntu22 -f mode=boot -f save=true -f loop=true   NOTE: boot dan modifikasi dan loop
+# gh workflow run build.yml -f mode=install --ref loop-xubuntu22 NOTE: setelah selsai tekan shutdown klik enter
+# gh workflow run build.yml --ref loop-xubuntu22 -f mode=boot -f save=true                NOTE: boot untuk modifikasi image dan keluar
+# gh workflow run build.yml --ref loop-xubuntu22 -f mode=boot -f save=true -f loop=true   NOTE: boot dan modifikasi dan loop
 
 jobs:
   vm:
@@ -143,6 +143,7 @@ jobs:
           CHAT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           CHAT_ID: "7797309176"
         run: |
+          cd $WORK
           MON=/tmp/qemu-mon.sock
           key() { echo "sendkey $1" | socat - UNIX-CONNECT:$MON > /dev/null 2>&1; sleep 0.15; }
 

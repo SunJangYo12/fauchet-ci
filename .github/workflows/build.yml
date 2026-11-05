@@ -25,9 +25,9 @@ concurrency:
   group: xubuntu-vm
   cancel-in-progress: false
 
-# gh workflow run build.yml -f mode=install --ref loop-xubuntu22 NOTE: setelah selsai tekan shutdown klik enter
-# gh workflow run build.yml --ref loop-xubuntu22 -f mode=boot -f save=true                NOTE: boot untuk modifikasi image dan keluar
-# gh workflow run build.yml --ref loop-xubuntu22 -f mode=boot -f save=true -f loop=true   NOTE: boot dan modifikasi dan loop
+# gh workflow run build.yml -f mode=install --ref loop-xubuntu22            NOTE: setelah selsai tekan shutdown klik enter
+# gh workflow run build.yml --ref loop-xubuntu22 -f mode=boot -f save=true  NOTE: boot untuk modifikasi image dan keluar
+# gh workflow run build.yml --ref loop-xubuntu22 -f mode=boot -f loop=true  NOTE: boot dan modifikasi dan loop
 
 jobs:
   vm:
@@ -88,7 +88,7 @@ jobs:
         if: env.MODE == 'install'
         run: |
           cd $WORK
-          qemu-img create -f qcow2 xubuntu.qcow2 14G
+          qemu-img create -f qcow2 xubuntu.qcow2 40G
           wget -q -O xubuntu.iso https://cdimage.ubuntu.com/xubuntu/releases/22.04/release/xubuntu-22.04.5-desktop-amd64.iso
           ls -lh
 
@@ -99,7 +99,6 @@ jobs:
         run: |
           cd $WORK
           gh run download --repo "$GITHUB_REPOSITORY" --name xubuntu-disk --dir .
-          gunzip -c xubuntu.tar.gz | tar -xzf -
           ls -lh
 
       - name: Jalankan QEMU
@@ -112,7 +111,7 @@ jobs:
             BOOT_ARGS="-cdrom xubuntu.iso -boot d"
           fi
           nohup qemu-system-x86_64 \
-            -enable-kvm -cpu host -smp 4 -m 10G \
+            -enable-kvm -cpu host -smp 4 -m 15G \
             -machine q35 \
             -drive file=xubuntu.qcow2,if=virtio,cache=unsafe \
             $BOOT_ARGS \
@@ -256,21 +255,17 @@ jobs:
           cd $WORK
           qemu-img convert -c -O qcow2 xubuntu.qcow2 xubuntu-small.qcow2
           mv xubuntu-small.qcow2 xubuntu.qcow2
-
-          tar -czf - xubuntu.qcow2 | gzip -9 > xubuntu.tar.gz
-
           rm -f xubuntu.iso
           ls -lh
-
 
       - name: Simpan disk sebagai artifact
         if: env.MODE == 'install' || inputs.save
         uses: actions/upload-artifact@v4
         with:
           name: xubuntu-disk
-          path: ${{ env.WORK }}/xubuntu.tar.gz
+          path: ${{ env.WORK }}/xubuntu.qcow2
           compression-level: 0
-          retention-days: 1
+          retention-days: 120
           overwrite: true
 
       - name: Lanjut sesi berikutnya
@@ -279,4 +274,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh workflow run "${{ github.workflow }}" --repo "$GITHUB_REPOSITORY" --ref "${{ github.ref_name }}" \
-            -f mode=boot -f save=true -f loop=true
+            -f mode=boot -f loop=true

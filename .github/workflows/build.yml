@@ -39,7 +39,7 @@ jobs:
     env:
       WORK: /home/runner/vm
       MODE: ${{ inputs.mode }}
-      WHORUN: "${{ inputs.mode }}-loop(${{ inputs.mode }})"
+      WHORUN: "${{ inputs.mode }}-loop(${{ inputs.loop }})"
     steps:
       - name: Hitung hari (WIB)
         id: day
@@ -88,7 +88,7 @@ jobs:
         if: env.MODE == 'install'
         run: |
           cd $WORK
-          qemu-img create -f qcow2 xubuntu.qcow2 40G
+          qemu-img create -f qcow2 xubuntu.qcow2 14G
           wget -q -O xubuntu.iso https://cdimage.ubuntu.com/xubuntu/releases/22.04/release/xubuntu-22.04.5-desktop-amd64.iso
           ls -lh
 
@@ -99,6 +99,7 @@ jobs:
         run: |
           cd $WORK
           gh run download --repo "$GITHUB_REPOSITORY" --name xubuntu-disk --dir .
+          gunzip -c xubuntu.tar.gz | tar -xzf -
           ls -lh
 
       - name: Jalankan QEMU
@@ -255,17 +256,21 @@ jobs:
           cd $WORK
           qemu-img convert -c -O qcow2 xubuntu.qcow2 xubuntu-small.qcow2
           mv xubuntu-small.qcow2 xubuntu.qcow2
+
+          tar -czf - xubuntu.qcow2 | gzip -9 > xubuntu.tar.gz
+
           rm -f xubuntu.iso
           ls -lh
+
 
       - name: Simpan disk sebagai artifact
         if: env.MODE == 'install' || inputs.save
         uses: actions/upload-artifact@v4
         with:
           name: xubuntu-disk
-          path: ${{ env.WORK }}/xubuntu.qcow2
+          path: ${{ env.WORK }}/xubuntu.tar.gz
           compression-level: 0
-          retention-days: 3
+          retention-days: 1
           overwrite: true
 
       - name: Lanjut sesi berikutnya

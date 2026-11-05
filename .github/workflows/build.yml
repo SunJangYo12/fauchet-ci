@@ -39,7 +39,7 @@ jobs:
     env:
       WORK: /home/runner/vm
       MODE: ${{ inputs.mode }}
-      WHORUN: "loop"
+      WHORUN: "$MODE-loop(${{ inputs.mode }})"
     steps:
       - name: Hitung hari (WIB)
         id: day
@@ -224,7 +224,8 @@ jobs:
           alive() { pgrep -x qemu-system-x86 > /dev/null; }
 
           # tunggu kamu shutdown dari dalam VM (maks 4,5 jam, sisakan waktu untuk kompres + upload)
-          for i in $(seq 1 1620); do
+          #for i in $(seq 1 1620); do
+          for i in $(seq 1 320); do
             alive || break
             sleep 10
           done

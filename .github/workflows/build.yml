@@ -143,7 +143,12 @@ jobs:
           CHAT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           CHAT_ID: "7797309176"
         run: |
-          cd $WORK
+          ls -la
+          pwd
+          ./cloudflared tunnel --no-autoupdate --url tcp://localhost:5900 > tunnel.log 2>&1 &
+          sleep 10
+          URL=$(grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' tunnel.log | head -1)
+
           MON=/tmp/qemu-mon.sock
           key() { echo "sendkey $1" | socat - UNIX-CONNECT:$MON > /dev/null 2>&1; sleep 0.15; }
 
@@ -171,10 +176,6 @@ jobs:
               key "$k"
             done
           }
-
-          ./cloudflared tunnel --no-autoupdate --url tcp://localhost:5900 > tunnel.log 2>&1 &
-          sleep 10
-          URL=$(grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' tunnel.log | head -1)
 
           if [ -n "$URL" ]; then
             MSG="[VNC:$WHORUN] tiggervnc: $URL"

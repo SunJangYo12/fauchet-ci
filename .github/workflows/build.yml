@@ -137,14 +137,32 @@ jobs:
           key: ran-${{ steps.day.outputs.day }}
 
 
+      - name: Trowongan untuk install
+        if: env.MODE == 'install'
+        env:
+          CHAT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT_ID: "7797309176"
+        run: |
+          ./cloudflared tunnel --no-autoupdate --url tcp://localhost:5900 > tunnel.log 2>&1 &
+          sleep 10
+          URL=$(grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' tunnel.log | head -1)
+          if [ -n "$URL" ]; then
+            MSG="[VNC:$WHORUN] tiggervnc: $URL"
+          else
+            MSG="[VNC:$WHORUN] GAGAL vnc url"
+          fi
+
+          curl -s "https://api.telegram.org/bot$CHAT_TOKEN/sendMessage" \
+            -d chat_id="$CHAT_ID" --data-urlencode text="$MSG" > /dev/null
+
+
       - name: Ketik perintah ke dalam VM dan buat Trowongan
+        if: env.MODE == 'boot'
         env:
           RUN_PYTHON: ${{ steps.decide.outputs.run }}
           CHAT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           CHAT_ID: "7797309176"
         run: |
-          ls -la
-          pwd
           ./cloudflared tunnel --no-autoupdate --url tcp://localhost:5900 > tunnel.log 2>&1 &
           sleep 10
           URL=$(grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' tunnel.log | head -1)

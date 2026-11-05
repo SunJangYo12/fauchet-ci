@@ -1,7 +1,7 @@
 Saat boot dan modifikasi image siapkan ini:
 sudo apt install python3 python3-pip virtualenv git
-git clone https://github.com/sunjangyo12/test-ci
-cd test-ci
+git clone https://github.com/sunjangyo12/fauchet-ci
+cd fauchet-ci
 git checkout loop-xubuntu22
 cd ~
 virtualenv myenv

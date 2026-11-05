@@ -1,0 +1,257 @@
+name: xubuntu-vm
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "install = boot ISO lalu install; boot = pakai disk hasil install"
+        type: choice
+        options: [install, boot]
+        default: install
+      save:
+        description: "Simpan disk kembali sebagai artifact setelah VM mati (mode boot)"
+        type: boolean
+        default: false
+      loop:
+        description: "Mulai loop di boot"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: xubuntu-vm
+  cancel-in-progress: false
+
+# gh workflow run build.yml -f mode=install --ref ci-boot-xubuntu22 NOTE: setelah selsai tekan shutdown klik enter
+# gh workflow run build.yml --ref ci-boot-xubuntu22 -f mode=boot -f save=true                NOTE: boot untuk modifikasi image dan keluar
+# gh workflow run build.yml --ref ci-boot-xubuntu22 -f mode=boot -f save=true -f loop=true   NOTE: boot dan modifikasi dan loop
+
+jobs:
+  vm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    outputs:
+      run: ${{ steps.decide.outputs.run }}
+      day: ${{ steps.day.outputs.day }}
+    env:
+      WORK: /home/runner/vm
+      MODE: ${{ inputs.mode }}
+      WHORUN: "loop"
+    steps:
+      - name: Hitung hari (WIB)
+        id: day
+        run: echo "day=$(TZ=Asia/Jakarta date +%F)" >> "$GITHUB_OUTPUT"
+
+      - name: Cek apakah hari ini sudah jalan
+        id: lookup
+        uses: actions/cache/restore@v4
+        with:
+          path: .ran-marker
+          key: ran-${{ steps.day.outputs.day }}
+          lookup-only: true
+
+      - name: Putuskan
+        id: decide
+        run: |
+          if [ "${{ steps.lookup.outputs.cache-hit }}" != "true" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Hari ${{ steps.day.outputs.day }} sudah dijalankan, skip."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+
+      - name: Kosongkan disk runner
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo docker image prune -af || true
+          df -h /
+          mkdir -p $WORK
+
+      - name: Pasang paket
+        run: |
+          ls -l /dev/kvm || echo "KVM TIDAK ADA (akan lambat)"
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-x86 qemu-utils socat jq
+          curl -sSL https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz | sudo tar -xz -C /usr/local/bin
+          curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
+          chmod +x cloudflared
+
+
+      - name: Siapkan disk (mode install)
+        if: env.MODE == 'install'
+        run: |
+          cd $WORK
+          qemu-img create -f qcow2 xubuntu.qcow2 40G
+          wget -q -O xubuntu.iso https://cdimage.ubuntu.com/xubuntu/releases/22.04/release/xubuntu-22.04.5-desktop-amd64.iso
+          ls -lh
+
+      - name: Unduh disk hasil install (mode boot)
+        if: env.MODE == 'boot'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd $WORK
+          gh run download --repo "$GITHUB_REPOSITORY" --name xubuntu-disk --dir .
+          ls -lh
+
+      - name: Jalankan QEMU
+        env:
+          VNC_PASSWORD: ${{ secrets.VNC_PASSWORD }}
+        run: |
+          cd $WORK
+          BOOT_ARGS=""
+          if [ "$MODE" = "install" ]; then
+            BOOT_ARGS="-cdrom xubuntu.iso -boot d"
+          fi
+          nohup qemu-system-x86_64 \
+            -enable-kvm -cpu host -smp 4 -m 10G \
+            -machine q35 \
+            -drive file=xubuntu.qcow2,if=virtio,cache=unsafe \
+            $BOOT_ARGS \
+            -no-reboot \
+            -netdev user,id=n0,hostfwd=tcp:127.0.0.1:20022-:20022 \
+            -device virtio-net-pci,netdev=n0 \
+            -device virtio-vga,xres=1024,yres=600 -device qemu-xhci -device usb-tablet \
+            -monitor unix:/tmp/qemu-mon.sock,server,nowait \
+            -vnc 127.0.0.1:0,password=on > qemu.log 2>&1 &
+          sleep 5
+          echo "set_password vnc $VNC_PASSWORD" | socat - UNIX-CONNECT:/tmp/qemu-mon.sock
+
+
+      - name: Tandai hari ini selesai
+        if: inputs.loop
+        run: echo "${{ steps.day.outputs.day }}" > .ran-marker
+
+      - name: Simpan penanda hari
+        if: inputs.loop
+        uses: actions/cache/save@v4
+        with:
+          path: .ran-marker
+          key: ran-${{ steps.day.outputs.day }}
+
+
+      - name: Ketik perintah ke dalam VM dan buat Trowongan
+        env:
+          RUN_PYTHON: ${{ steps.decide.outputs.run }}
+          CHAT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT_ID: "7797309176"
+        run: |
+          MON=/tmp/qemu-mon.sock
+          key() { echo "sendkey $1" | socat - UNIX-CONNECT:$MON > /dev/null 2>&1; sleep 0.15; }
+
+          # ketik satu string, karakter demi karakter (layout keyboard US)
+          type_text() {
+            local s="$1" c k i
+            for ((i=0; i<${#s}; i++)); do
+              c="${s:$i:1}"
+              case "$c" in
+                [a-z0-9]) k="$c" ;;
+                [A-Z])    k="shift-$(echo "$c" | tr A-Z a-z)" ;;
+                " ") k=spc ;;      ".") k=dot ;;       "/") k=slash ;;
+                "-") k=minus ;;    "_") k=shift-minus ;; "=") k=equal ;;
+                "+") k=shift-equal ;; ":") k=shift-semicolon ;; ";") k=semicolon ;;
+                "|") k=shift-backslash ;; "\\") k=backslash ;;
+                "&") k=shift-7 ;;  ">") k=shift-dot ;;  "<") k=shift-comma ;;
+                ",") k=comma ;;    "'") k=apostrophe ;; '"') k=shift-apostrophe ;;
+                "$") k=shift-4 ;;  "(") k=shift-9 ;;    ")") k=shift-0 ;;
+                "*") k=shift-8 ;;  "#") k=shift-3 ;;    "!") k=shift-1 ;;
+                "@") k=shift-2 ;;  "%") k=shift-5 ;;    "?") k=shift-slash ;;
+                "~") k=shift-grave_accent ;; '`') k=grave_accent ;;
+                "[") k=bracket_left ;; "]") k=bracket_right ;;
+                *) echo "karakter tidak didukung: $c"; continue ;;
+              esac
+              key "$k"
+            done
+          }
+
+          ./cloudflared tunnel --no-autoupdate --url tcp://localhost:5900 > tunnel.log 2>&1 &
+          sleep 10
+          URL=$(grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' tunnel.log | head -1)
+
+          if [ -n "$URL" ]; then
+            MSG="[VNC:$WHORUN] tiggervnc: $URL"
+          else
+            MSG="[VNC:$WHORUN] GAGAL vnc url"
+          fi
+
+          if [ "$RUN_PYTHON" = "skipped" ]; then
+            echo "Hari ini sudah jalan, hanya run qemu"
+            echo "$MSG"
+
+          else #hanya run 1x sehari
+            curl -s "https://api.telegram.org/bot$CHAT_TOKEN/sendMessage" \
+              -d chat_id="$CHAT_ID" --data-urlencode text="$MSG" > /dev/null
+
+            key ctrl-alt-t          # buka terminal
+            sleep 5
+            type_text "source myenv/bin/activate"
+            key ret                 # Enter
+            type_text "python btc_faucet/gabung.py"
+            key ret                 # Enter
+          fi
+
+
+      - name: Tunggu VM mati
+        run: |
+          mon() { echo "$1" | socat - UNIX-CONNECT:/tmp/qemu-mon.sock > /dev/null 2>&1 || true; }
+          alive() { pgrep -x qemu-system-x86 > /dev/null; }
+
+          # tunggu kamu shutdown dari dalam VM (maks 4,5 jam, sisakan waktu untuk kompres + upload)
+          for i in $(seq 1 1620); do
+            alive || break
+            sleep 10
+          done
+
+          # masih hidup: minta guest mati dengan rapi (maks 90 detik)
+          if alive; then
+            echo "VM masih hidup, kirim system_powerdown"
+            mon system_powerdown
+            for i in $(seq 1 18); do alive || break; sleep 5; done
+          fi
+
+          # masih hidup juga: hentikan QEMU lewat monitor
+          if alive; then
+            echo "Guest tidak merespons, paksa quit"
+            mon quit
+            for i in $(seq 1 12); do alive || break; sleep 5; done
+          fi
+
+          # pastikan benar-benar mati sebelum disk dibuka
+          pkill -9 -x qemu-system-x86 || true
+          sleep 2
+          alive && { echo "QEMU masih ada"; exit 1; } || echo "QEMU sudah berhenti"
+
+
+      - name: Kompres disk
+        if: env.MODE == 'install' || inputs.save
+        run: |
+          cd $WORK
+          qemu-img convert -c -O qcow2 xubuntu.qcow2 xubuntu-small.qcow2
+          mv xubuntu-small.qcow2 xubuntu.qcow2
+          rm -f xubuntu.iso
+          ls -lh
+
+      - name: Simpan disk sebagai artifact
+        if: env.MODE == 'install' || inputs.save
+        uses: actions/upload-artifact@v4
+        with:
+          name: xubuntu-disk
+          path: ${{ env.WORK }}/xubuntu.qcow2
+          compression-level: 0
+          retention-days: 3
+          overwrite: true
+
+      - name: Lanjut sesi berikutnya
+        if: inputs.loop
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run "${{ github.workflow }}" --repo "$GITHUB_REPOSITORY" --ref "${{ github.ref_name }}" \
+            -f mode=boot -f save=true -f loop=true

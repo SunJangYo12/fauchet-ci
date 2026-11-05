@@ -1,6 +1,8 @@
 name: xubuntu-vm
 
 on:
+  schedule:
+    - cron: '0 9 * * *'        # 09:00 UTC = 16:00 WIB
   workflow_dispatch:
     inputs:
       mode:
@@ -25,6 +27,7 @@ concurrency:
   group: xubuntu-vm
   cancel-in-progress: false
 
+# otomatis jalan di jam 4 sore
 # gh workflow run build.yml -f mode=install --ref loop-xubuntu22            NOTE: setelah selsai tekan shutdown klik enter
 # gh workflow run build.yml --ref loop-xubuntu22 -f mode=boot -f save=true  NOTE: boot untuk modifikasi image dan keluar
 # gh workflow run build.yml --ref loop-xubuntu22 -f mode=boot -f loop=true  NOTE: boot dan modifikasi dan loop
@@ -33,35 +36,42 @@ jobs:
   vm:
     runs-on: ubuntu-latest
     timeout-minutes: 360
-    outputs:
-      run: ${{ steps.decide.outputs.run }}
-      day: ${{ steps.day.outputs.day }}
     env:
       WORK: /home/runner/vm
       MODE: ${{ inputs.mode }}
       WHORUN: "${{ inputs.mode }}-loop(${{ inputs.loop }})"
-    steps:
-      - name: Hitung hari (WIB)
-        id: day
-        run: echo "day=$(TZ=Asia/Jakarta date +%F)" >> "$GITHUB_OUTPUT"
+      LANJUT: true
+      COUNTER: 0
 
-      - name: Cek apakah hari ini sudah jalan
-        id: lookup
+    steps:
+      - name: Restore counter
         uses: actions/cache/restore@v4
         with:
-          path: .ran-marker
-          key: ran-${{ steps.day.outputs.day }}
-          lookup-only: true
+          path: .counter
+          key: xubuntu-counter-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            xubuntu-counter-
 
-      - name: Putuskan
-        id: decide
+      - name: Increment counter
+        id: counter
         run: |
-          if [ "${{ steps.lookup.outputs.cache-hit }}" != "true" ]; then
-            echo "run=true" >> "$GITHUB_OUTPUT"
+          mkdir -p .counter
+
+          if [ -f .counter/counter.txt ]; then
+            COUNT=$(cat .counter/counter.txt)
           else
-            echo "Hari ${{ steps.day.outputs.day }} sudah dijalankan, skip."
-            echo "run=false" >> "$GITHUB_OUTPUT"
+            COUNT=0
           fi
+
+          COUNT=$((COUNT + 1))
+
+          echo "$COUNT" > .counter/counter.txt
+          echo "COUNTER=$COUNT" >> "$GITHUB_ENV"
+
+          echo "================================"
+          echo "Workflow session: $COUNT"
+          echo "================================"
+
 
 
       - name: Kosongkan disk runner
@@ -125,19 +135,7 @@ jobs:
           echo "set_password vnc $VNC_PASSWORD" | socat - UNIX-CONNECT:/tmp/qemu-mon.sock
 
 
-      - name: Tandai hari ini selesai
-        if: inputs.loop
-        run: echo "${{ steps.day.outputs.day }}" > .ran-marker
-
-      - name: Simpan penanda hari
-        if: inputs.loop
-        uses: actions/cache/save@v4
-        with:
-          path: .ran-marker
-          key: ran-${{ steps.day.outputs.day }}
-
-
-      - name: Trowongan untuk install
+      - name: Trowongan (install)
         if: env.MODE == 'install'
         env:
           CHAT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -201,11 +199,7 @@ jobs:
             MSG="[VNC:$WHORUN] GAGAL vnc url"
           fi
 
-          if [ "$RUN_PYTHON" = "skipped" ]; then
-            echo "Hari ini sudah jalan, hanya run qemu"
-            echo "$MSG"
-
-          else #hanya run 1x sehari
+          if [ "$COUNTER" == "0" ]; then
             curl -s "https://api.telegram.org/bot$CHAT_TOKEN/sendMessage" \
               -d chat_id="$CHAT_ID" --data-urlencode text="$MSG" > /dev/null
 
@@ -215,6 +209,13 @@ jobs:
             key ret                 # Enter
             type_text "python fauchet-ci/Btc/gabung.py"
             key ret                 # Enter
+
+          elif [ "$COUNTER" == "2" ]; then
+            echo "LANJUT=false" >> "$GITHUB_ENV"
+
+          else
+            echo "Hari ini sudah jalan, hanya run qemu"
+            echo "$MSG"
           fi
 
 
@@ -268,8 +269,15 @@ jobs:
           retention-days: 120
           overwrite: true
 
+      - name: Save counter
+        if: env.MODE == 'boot' || inputs.loop
+        uses: actions/cache/save@v4
+        with:
+          path: .counter
+          key: xubuntu-counter-${{ github.run_id }}-${{ github.run_attempt }}
+
       - name: Lanjut sesi berikutnya
-        if: inputs.loop
+        if: inputs.loop && env.LANJUT
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

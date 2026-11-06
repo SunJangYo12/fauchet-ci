@@ -202,7 +202,7 @@ jobs:
 
           key ctrl-alt-t
           sleep 5
-          type_text "cd ~/Desktop; git clone https://github.com/sunjangyo12/fauchet-ci; git checkout loop-xubuntu22;exit"
+          type_text "cd ~/Desktop; git clone https://github.com/sunjangyo12/fauchet-ci; git checkout loop-xubuntu22"
           key ret                 # Enter
 
           if [ "$COUNTER" == "1" ]; then

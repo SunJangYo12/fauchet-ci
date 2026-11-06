@@ -4,7 +4,7 @@ name: xubuntu-vm
 on:
   schedule:
 #   - cron: '0 9 * * *'        # 09:00 UTC = 16:00 WIB
-    - cron: '50 3 * * *'  # 10:09 WIB = 03:09 UTC
+    - cron: '30 4 * * *' # 11:30
   workflow_dispatch:
     inputs:
       mode:

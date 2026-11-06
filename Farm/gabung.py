@@ -299,7 +299,10 @@ def ambil_initdata_auto(
                 # input("Belum login. Login dulu, lalu tekan Enter...")
                 pass
 
-            page.on("dialog", lambda dialog: dialog.dismiss())   # atau dialog.accept()
+            page.add_locator_handler(
+                page.get_by_role("button", name="Launch"),   # sesuaikan teks tombolnya Launch/Cancel
+                lambda btn: btn.click()
+            )
 
             buka_mini_app(page)
 

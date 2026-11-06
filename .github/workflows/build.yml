@@ -217,7 +217,7 @@ jobs:
             key ret                 # Enter
             type_text "python ~/Desktop/fauchet-ci/Btc/gabung.py"
             key ret                 # Enter
-            sleep 10
+            sleep 60
             key ctrl-alt-t          # buka terminal
             sleep 5
             type_text "source ~/myenv/bin/activate"

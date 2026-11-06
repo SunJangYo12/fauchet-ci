@@ -1039,8 +1039,8 @@ def main():
         print()
 
         # langsung cli
-        #do_farm()
-        #exit()
+        do_farm()
+        exit()
 
 
         print(f"{MAGENTA}❯{RESET} {YELLOW}pilih:{RESET} ", end="")

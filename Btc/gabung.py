@@ -278,6 +278,12 @@ def get_initdata_auto():
                     except Exception:
                         pass
                     page.wait_for_timeout(1000)
+
+            page.add_locator_handler(
+                page.get_by_role("button", name="Launch"),   # sesuaikan teks tombolnya Launch/Cancel
+                lambda btn: btn.click()
+            )
+
             buka_mini_app_telegram(page)
             deadline = time.time() + TG_TIMEOUT
             while time.time() < deadline:

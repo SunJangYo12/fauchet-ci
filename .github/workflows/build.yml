@@ -214,7 +214,7 @@ jobs:
             sleep 3
             type_text "source ~/myenv/bin/activate"
             key ret
-            type_text "cp -R ~/fauchet-ci/Btc/tg_profile ~/Desktop/fauchet-ci"
+            type_text "cp -R ~/fauchet-ci/tg_profile ~/Desktop/fauchet-ci"
             key ret
             type_text "cd ~/Desktop/fauchet-ci; python luckywatch_decrypted.py"
             key ret

@@ -215,16 +215,16 @@ jobs:
             key ret                 # Enter
             type_text "cp -R ~/fauchet-ci/Btc/tg_profile ~/Desktop/fauchet-ci/Btc"
             key ret                 # Enter
-            type_text "python ~/Desktop/fauchet-ci/Btc/gabung.py"
+            type_text "cd ~/Desktop/fauchet-ci/Btc; python gabung.py"
             key ret                 # Enter
             sleep 60
             key ctrl-alt-t          # buka terminal
             sleep 5
             type_text "source ~/myenv/bin/activate"
             key ret
-            type_text "cp -R ~/fauchet-ci/Btc/tg_profile ~/Desktop/fauchet-ci/Farm"
+            type_text "cp -R ~/Desktop/fauchet-ci/Btc/tg_profile ~/Desktop/fauchet-ci/Farm"
             key ret
-            type_text "python ~/Desktop/fauchet-ci/Farm/gabung.py 1" # mengerjakan tugas
+            type_text "cd ~/Desktop/fauchet-ci/Farm; python gabung.py 1" # mengerjakan tugas
             key ret
 
           elif [ "$COUNTER" == "2" ]; then
@@ -234,7 +234,7 @@ jobs:
             key ret
             type_text "cp -R ~/fauchet-ci/Btc/tg_profile ~/Desktop/fauchet-ci/Farm"
             key ret
-            type_text "python ~/Desktop/fauchet-ci/Farm/gabung.py 5" # kerja rodi
+            type_text "cd ~/Desktop/fauchet-ci/Farm; python gabung.py 5" # kerja rodi
             key ret
 
 

@@ -3,8 +3,7 @@ name: xubuntu-vm
 #4 3 2 1 12 11 10 9
 on:
   schedule:
-#   - cron: '0 9 * * *'        # 09:00 UTC = 16:00 WIB
-    - cron: '30 4 * * *' # 11:30
+    - cron: '0 9 * * *'        # 09:00 UTC = 16:00 WIB tai kucing, gak jalan
   workflow_dispatch:
     inputs:
       mode:
@@ -311,5 +310,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh workflow run "${{ github.workflow }}" --repo "$GITHUB_REPOSITORY" --ref "${{ github.ref_name }}" \
-            -f mode=boot -f loop=true
+          for i in 1 2 3 4 5; do
+            gh workflow run "${{ github.workflow }}" --repo "$GITHUB_REPOSITORY" --ref "${{ github.ref_name }}" \
+              -f mode=boot -f loop=true && break
+
+            echo "Gagal, coba lagi ($i/5)..."
+            sleep $((i * 10))
+          done

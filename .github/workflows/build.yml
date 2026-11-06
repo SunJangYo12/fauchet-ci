@@ -209,7 +209,7 @@ jobs:
                 "$COUNTER" == "3" ||
                 "$COUNTER" == "4"
              ]]; then
-            RUN_BY="\n-Luckywatch\n"
+            RUN_BY="/Luckywatch"
             key ctrl-alt-t
             sleep 3
             type_text "source ~/myenv/bin/activate"
@@ -223,7 +223,7 @@ jobs:
 
 
           if [ "$COUNTER" == "1" ]; then
-            RUN_BY="$RUN_BY-BcFauchet\n-FarmBouty[mengerjakan tugas]\n"
+            RUN_BY="$RUN_BY\n/BcFauchet\n/FarmBouty[mengerjakan tugas]"
 
             key ctrl-alt-t          # buka terminal
             sleep 5
@@ -244,7 +244,7 @@ jobs:
             key ret
 
           elif [ "$COUNTER" == "2" ]; then
-            RUN_BY="$RUN_BY-FarmBouty[Rodi]\n"
+            RUN_BY="$RUN_BY\n/FarmBouty[Rodi]"
 
             key ctrl-alt-t
             sleep 5

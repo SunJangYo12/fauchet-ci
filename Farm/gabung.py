@@ -104,7 +104,6 @@ import json, re, time
 from urllib.parse import urlparse, parse_qs, quote
 from playwright.sync_api import sync_playwright
 
-# ====== ISI INI ======
 BOT = "FarmBuddiesBot"        # username bot, tanpa @
 APP = ""               # short name Mini App (kosong kalau pakai tombol di chat)
 START = ""             # parameter startapp (opsional)
@@ -118,7 +117,6 @@ NAMA_CHAT = "Farm Buddies"
 #    <span class="peer-title">Farm Buddies</span>
 #</a>
 # jika lokasi tombol untuk buka minapp tambahkan di bagian ini page.get_by_role("button", name=re.compile(r"^(launch|open|confirm|farm)"
-# =====================
 
 PATCH = """
 (() => {
@@ -1607,6 +1605,9 @@ def main():
             print(f"\n{fg(C_HDR_1)}Sampai jumpa, Bos.{RST}\n"); sys.exit(0)
         else:
             print(f"\n{fg(C_ERR)}Pilihan tidak valid.{RST}"); time.sleep(1)
+
+        sys.exit(0)
+
 
 if __name__ == "__main__":
     try:

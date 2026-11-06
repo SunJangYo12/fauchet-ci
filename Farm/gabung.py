@@ -299,6 +299,8 @@ def ambil_initdata_auto(
                 # input("Belum login. Login dulu, lalu tekan Enter...")
                 pass
 
+            page.on("dialog", lambda dialog: dialog.dismiss())   # atau dialog.accept()
+
             buka_mini_app(page)
 
             init_data = None

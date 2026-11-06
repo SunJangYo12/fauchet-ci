@@ -136,7 +136,7 @@ jobs:
           echo "set_password vnc $VNC_PASSWORD" | socat - UNIX-CONNECT:/tmp/qemu-mon.sock
 
 
-      - name: Trowongan (install)
+      - name: Trowongan (mode install)
         if: env.MODE == 'install'
         env:
           CHAT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -202,7 +202,7 @@ jobs:
 
           key ctrl-alt-t
           sleep 5
-          type_text "cd ~/Desktop; git clone https://github.com/sunjangyo12/fauchet-ci; git checkout loop-xubuntu22"
+          type_text "cd ~/Desktop; git clone https://github.com/sunjangyo12/fauchet-ci; git checkout loop-xubuntu22;exit"
           key ret                 # Enter
 
           if [ "$COUNTER" == "1" ]; then
@@ -211,13 +211,13 @@ jobs:
 
             key ctrl-alt-t          # buka terminal
             sleep 5
-            type_text "source myenv/bin/activate"
+            type_text "source ~/myenv/bin/activate"
             key ret                 # Enter
             type_text "cp -R ~/fauchet-ci/Btc/tg_profile ~/Desktop/fauchet-ci/Btc"
             key ret                 # Enter
             type_text "python ~/Desktop/fauchet-ci/Btc/gabung.py"
             key ret                 # Enter
-            sleep 1
+            sleep 10
             key ctrl-alt-t          # buka terminal
             sleep 5
             type_text "source ~/myenv/bin/activate"

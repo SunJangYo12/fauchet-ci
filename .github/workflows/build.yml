@@ -209,7 +209,8 @@ jobs:
                 "$COUNTER" == "3" ||
                 "$COUNTER" == "4"
              ]]; then
-            RUN_BY="/Luckywatch"
+            RUN_BY=$(printf "\n%s" "-Luckywatch")
+
             key ctrl-alt-t
             sleep 3
             type_text "source ~/myenv/bin/activate"
@@ -223,7 +224,8 @@ jobs:
 
 
           if [ "$COUNTER" == "1" ]; then
-            RUN_BY="$RUN_BY\n/BcFauchet\n/FarmBouty[mengerjakan tugas]"
+            RUN_BY=$RUN_BY$(printf "\n%s\n%s\n" "-BcFauchet" "-FarmBody[mengerjakan tugas]")
+
 
             key ctrl-alt-t          # buka terminal
             sleep 5
@@ -244,7 +246,7 @@ jobs:
             key ret
 
           elif [ "$COUNTER" == "2" ]; then
-            RUN_BY="$RUN_BY\n/FarmBouty[Rodi]"
+            RUN_BY=$RUN_BY$(printf "\n%s\n" "-FarmBody[kerja rodi]")
 
             key ctrl-alt-t
             sleep 5

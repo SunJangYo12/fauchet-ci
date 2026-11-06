@@ -331,7 +331,7 @@ jobs:
           key: xubuntu-counter-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Lanjut sesi berikutnya
-        if: inputs.loop #&& env.LANJUT
+        if: inputs.loop && env.MODE == 'boot' #&& env.LANJUT
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

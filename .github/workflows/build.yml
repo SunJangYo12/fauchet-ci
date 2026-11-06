@@ -9,7 +9,7 @@ on:
         description: "install = boot ISO lalu install; boot = pakai disk hasil install"
         type: choice
         options: [install, boot]
-        default: install
+        default: boot
       save:
         description: "Simpan disk kembali sebagai artifact setelah VM mati (mode boot)"
         type: boolean
@@ -17,7 +17,7 @@ on:
       loop:
         description: "Mulai loop di boot"
         type: boolean
-        default: false
+        default: true # karena schudle harus default
 
 permissions:
   contents: read
@@ -27,8 +27,8 @@ concurrency:
   group: xubuntu-vm
   cancel-in-progress: false
 
-# otomatis jalan di jam 4 sore
-# gh workflow run build.yml -f mode=install --ref loop-xubuntu22            NOTE: setelah selsai tekan shutdown klik enter
+# otomatis jalan di jam 4 sore (schudle)
+# gh workflow run build.yml --ref loop-xubuntu22 -f mode=install            NOTE: setelah selsai tekan shutdown klik enter
 # gh workflow run build.yml --ref loop-xubuntu22 -f mode=boot -f save=true  NOTE: boot untuk modifikasi image dan keluar
 # gh workflow run build.yml --ref loop-xubuntu22 -f mode=boot -f loop=true  NOTE: boot dan modifikasi dan loop
 
@@ -209,8 +209,28 @@ jobs:
             key ret                 # Enter
             type_text "python fauchet-ci/Btc/gabung.py"
             key ret                 # Enter
+            sleep 1
+            key ctrl-alt-t          # buka terminal
+            sleep 5
+            type_text "source myenv/bin/activate"
+            key ret
+            type_text "cp -R fauchet-ci/Btc/tg_profile fauchet-ci/Farm"
+            key ret
+            type_text "python fauchet-ci/Farm/gabung.py 1" # mengerjakan tugas
+            key ret
 
-          elif [ "$COUNTER" == "2" ]; then
+          elif [ "$COUNTER" == "1" ]; then
+            key ctrl-alt-t          # buka terminal
+            sleep 5
+            type_text "source myenv/bin/activate"
+            key ret
+            type_text "cp -R fauchet-ci/Btc/tg_profile fauchet-ci/Farm"
+            key ret
+            type_text "python fauchet-ci/Farm/gabung.py 5" # kerja rodi
+            key ret
+
+
+          elif [ "$COUNTER" == "2" ]; then # stop
             echo "LANJUT=false" >> "$GITHUB_ENV"
 
           else

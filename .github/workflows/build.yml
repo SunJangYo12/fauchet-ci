@@ -195,18 +195,17 @@ jobs:
           }
 
           if [ -n "$URL" ]; then
-            MSG="[VNC:$WHORUN] tiggervnc: $URL"
+            MSG="[VNC:$WHORUN-$COUNTER] tiggervnc: $URL"
           else
-            MSG="[VNC:$WHORUN] GAGAL vnc url"
+            MSG="[VNC:$WHORUN-$COUNTER] GAGAL vnc url"
           fi
-
 
           key ctrl-alt-t
           sleep 5
           type_text "cd ~/Desktop; git clone https://github.com/sunjangyo12/fauchet-ci; git checkout loop-xubuntu22"
           key ret                 # Enter
 
-          if [ "$COUNTER" == "0" ]; then
+          if [ "$COUNTER" == "1" ]; then
             curl -s "https://api.telegram.org/bot$CHAT_TOKEN/sendMessage" \
               -d chat_id="$CHAT_ID" --data-urlencode text="$MSG" > /dev/null
 
@@ -228,7 +227,7 @@ jobs:
             type_text "python ~/Desktop/fauchet-ci/Farm/gabung.py 1" # mengerjakan tugas
             key ret
 
-          elif [ "$COUNTER" == "1" ]; then
+          elif [ "$COUNTER" == "2" ]; then
             key ctrl-alt-t          # buka terminal
             sleep 5
             type_text "source myenv/bin/activate"
@@ -239,7 +238,7 @@ jobs:
             key ret
 
 
-          elif [ "$COUNTER" == "2" ]; then # stop
+          elif [ "$COUNTER" == "3" ]; then # stop
             echo "LANJUT=false" >> "$GITHUB_ENV"
 
           else

@@ -10,6 +10,55 @@ import struct
 import math
 import unicodedata
 
+
+
+# ========  AUTO LOGIN ========
+from playwright.sync_api import sync_playwright
+import json
+
+URL = "https://luckywatch.pro/home"
+
+def sudah_login(page):
+    return "/home" in page.url
+
+def ambil_cookie():
+    with sync_playwright() as p:
+        ctx = p.chromium.launch_persistent_context(
+            "./tg_profile",
+            channel="chrome",                       # Chrome asli, bukan Chromium bawaan
+            headless=False,
+            viewport={"width": 740, "height": 540},
+            ignore_default_args=["--enable-automation"],
+            args=["--disable-blink-features=AutomationControlled"],
+        )
+        try:
+            page = ctx.pages[0] if ctx.pages else ctx.new_page()
+            page.goto("https://luckywatch.pro/home")
+            page.wait_for_load_state("networkidle")  # tunggu redirect selesai
+
+            if not sudah_login(page):
+                print("Belum login, silakan login di jendela...")
+                page.wait_for_url("**/home", timeout=300_000)  # tunggu sampai 5 menit
+                print("Login berhasil, sesi tersimpan")
+            else:
+                print("Sudah login.")
+
+                cookies = ctx.cookies("https://luckywatch.pro")      # hanya untuk situs tertentu
+
+                hash_value = next((c["value"] for c in cookies if c["name"] == "hash"), None)
+                #print(hash_value)
+                return hash_value
+
+                #with open("cookies.json", "w", encoding="utf-8") as f:
+                #    json.dump(cookies, f, indent=2)
+
+        finally:
+            ctx.close()  # penting: tutup normal supaya sesi tertulis ke disk
+
+# ========  AUTO LOGIN ========
+
+
+
 if hasattr(sys.stdout, 'reconfigure'):
     try:
         sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -490,7 +539,8 @@ class LuckyWatchBot:
             print(box_end() + RESET + "\n")
 
             while not self.session_hash:
-                raw_in = input(f"{G}  → cookie / hash: ").strip()
+                #raw_in = input(f"{G}  → cookie / hash: ").strip()
+                raw_in = ambil_cookie()
                 self._parse_and_set_cookies(raw_in)
                 if not self.session_hash:
                     print(f"    {R}Cookies cannot be empty!{RESET}")

@@ -1,9 +1,8 @@
 name: xubuntu-vm
 
-#4 3 2 1 12 11 10 9
 on:
-  schedule:
-    - cron: '0 9 * * *'        # 09:00 UTC = 16:00 WIB tai kucing, gak jalan
+#  schedule:
+#    - cron: '0 9 * * *'        # 09:00 UTC = 16:00 WIB tai kucing, gak jalan
   workflow_dispatch:
     inputs:
       mode:
@@ -64,7 +63,11 @@ jobs:
             COUNT=0
           fi
 
-          COUNT=$((COUNT + 1))
+          if [ $COUNT == 5 ]; then
+            COUNT=1
+          else
+            COUNT=$((COUNT + 1))
+          fi
 
           echo "$COUNT" > .counter/counter.txt
           echo "COUNTER=$COUNT" >> "$GITHUB_ENV"
@@ -194,20 +197,33 @@ jobs:
             done
           }
 
-          if [ -n "$URL" ]; then
-            MSG="[VNC:$WHORUN-$COUNTER] tiggervnc: $URL"
-          else
-            MSG="[VNC:$WHORUN-$COUNTER] GAGAL vnc url"
-          fi
-
           key ctrl-alt-t
           sleep 5
           type_text "cd ~/Desktop; git clone https://github.com/sunjangyo12/fauchet-ci; git checkout loop-xubuntu22"
-          key ret                 # Enter
+          key ret
+
+
+          RUN_BY=""
+          if [[ "$COUNTER" == "1" ||
+                "$COUNTER" == "2" ||
+                "$COUNTER" == "3" ||
+                "$COUNTER" == "4"
+             ]]; then
+            RUN_BY="\n-Luckywatch\n"
+            key ctrl-alt-t
+            sleep 3
+            type_text "source ~/myenv/bin/activate"
+            key ret
+            type_text "cp -R ~/fauchet-ci/Btc/tg_profile ~/Desktop/fauchet-ci"
+            key ret
+            type_text "cd ~/Desktop/fauchet-ci; python luckywatch_decrypted.py"
+            key ret
+            sleep 3
+          fi
+
 
           if [ "$COUNTER" == "1" ]; then
-            curl -s "https://api.telegram.org/bot$CHAT_TOKEN/sendMessage" \
-              -d chat_id="$CHAT_ID" --data-urlencode text="$MSG" > /dev/null
+            RUN_BY="$RUN_BY-BcFauchet\n-FarmBouty[mengerjakan tugas]\n"
 
             key ctrl-alt-t          # buka terminal
             sleep 5
@@ -228,9 +244,11 @@ jobs:
             key ret
 
           elif [ "$COUNTER" == "2" ]; then
-            key ctrl-alt-t          # buka terminal
+            RUN_BY="$RUN_BY-FarmBouty[Rodi]\n"
+
+            key ctrl-alt-t
             sleep 5
-            type_text "source myenv/bin/activate"
+            type_text "source ~/myenv/bin/activate"
             key ret
             type_text "cp -R ~/fauchet-ci/Btc/tg_profile ~/Desktop/fauchet-ci/Farm"
             key ret
@@ -245,6 +263,14 @@ jobs:
             echo "Hari ini sudah jalan, hanya run qemu"
             echo "$MSG"
           fi
+
+          if [ -n "$URL" ]; then
+            MSG="[VNC-$COUNTER] tiggervnc: $URL $RUN_BY"
+          else
+            MSG="[VNC-$COUNTER] GAGAL vnc url $RUN_BY"
+          fi
+          curl -s "https://api.telegram.org/bot$CHAT_TOKEN/sendMessage" \
+            -d chat_id="$CHAT_ID" --data-urlencode text="$MSG" > /dev/null
 
 
       - name: Tunggu VM mati
@@ -305,7 +331,7 @@ jobs:
           key: xubuntu-counter-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Lanjut sesi berikutnya
-        if: inputs.loop && env.LANJUT
+        if: inputs.loop #&& env.LANJUT
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

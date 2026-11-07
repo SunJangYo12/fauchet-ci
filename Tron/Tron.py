@@ -156,7 +156,7 @@ def ask_email():
         print()
         say_info("Email tersimpan ditemukan:")
         print("    " + c("◈ ", N.PURP) + c(mask_email(saved), N.CYAN, N.BOLD))
-        if confirm("Gunakan email ini?"):
+        if True: #confirm("Gunakan email ini?"):
             say_ok(f"Email dimuat  ·  {mask_email(saved)}")
             return saved
     while True:

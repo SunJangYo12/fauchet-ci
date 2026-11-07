@@ -232,7 +232,7 @@ jobs:
 
 
           if [[ "$COUNTER" == "1" || "$COUNTER" == "3" ]]; then
-            RUN_BY=$RUN_BY$(printf "\n%s\n%s\n" "- BcFauchet" "- FarmBody[mengerjakan tugas]")
+            RUN_BY=$RUN_BY$(printf "\n%s\n" "- BcFauchet")
 
             key ctrl-alt-t          # buka terminal
             sleep 5
@@ -259,7 +259,7 @@ jobs:
             sleep 60
           fi
 
-          if [ "$COUNTER" == "4" ]; then
+          if [ "$COUNTER" == "5" ]; then
             RUN_BY=$RUN_BY$(printf "\n%s\n" "- TronBlow")
             key ctrl-alt-t
             sleep 5

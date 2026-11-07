@@ -256,9 +256,14 @@ jobs:
             type_text "cd ~/Desktop/fauchet-ci/Farm; python gabung.py 5" # kerja rodi
             key ret
 
-
-          elif [ "$COUNTER" == "3" ]; then # stop
-            echo "LANJUT=false" >> "$GITHUB_ENV"
+          elif [ "$COUNTER" == "3" ]; then
+            #echo "LANJUT=false" >> "$GITHUB_ENV" # stop loop
+            key ctrl-alt-t
+            sleep 5
+            type_text "source ~/myenv/bin/activate"
+            key ret
+            type_text "cd ~/Desktop/fauchet-ci/Tron; python Tron.py"
+            key ret
 
           else
             echo "Hari ini sudah jalan, hanya run qemu"

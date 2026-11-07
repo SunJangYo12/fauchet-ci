@@ -208,7 +208,7 @@ jobs:
                 "$COUNTER" == "2" ||
                 "$COUNTER" == "3"
              ]]; then
-            RUN_BY=$(printf "\n%s" "- Luckywatch")
+            RUN_BY=$(printf "\n%s\n%s\n" "- Luckywatch" "- FarmBdy[mengerjakan tugas]")
 
             key ctrl-alt-t
             sleep 3

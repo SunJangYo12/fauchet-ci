@@ -208,7 +208,7 @@ jobs:
                 "$COUNTER" == "2" ||
                 "$COUNTER" == "3"
              ]]; then
-            RUN_BY=$(printf "\n%s" "-Luckywatch")
+            RUN_BY=$(printf "\n%s" "- Luckywatch")
 
             key ctrl-alt-t
             sleep 3
@@ -218,13 +218,21 @@ jobs:
             key ret
             type_text "cd ~/Desktop/fauchet-ci; python luckywatch_decrypted.py"
             key ret
-            sleep 3
+            sleep 60 # tele wajib tunggu lama
+            key ctrl-alt-t
+            sleep 5
+            type_text "source ~/myenv/bin/activate"
+            key ret
+            type_text "cp -R ~/Desktop/fauchet-ci/Btc/tg_profile ~/Desktop/fauchet-ci/Farm"
+            key ret
+            type_text "cd ~/Desktop/fauchet-ci/Farm; python gabung.py 1" # mengerjakan tugas
+            key ret
+            sleep 60 # tele wajib tunggu lama
           fi
 
 
-          if [ "$COUNTER" == "1" ]; then
-            RUN_BY=$RUN_BY$(printf "\n%s\n%s\n" "-BcFauchet" "-FarmBody[mengerjakan tugas]")
-
+          if [[ "$COUNTER" == "1" || "$COUNTER" == "3" ]]; then
+            RUN_BY=$RUN_BY$(printf "\n%s\n%s\n" "- BcFauchet" "- FarmBody[mengerjakan tugas]")
 
             key ctrl-alt-t          # buka terminal
             sleep 5
@@ -235,17 +243,10 @@ jobs:
             type_text "cd ~/Desktop/fauchet-ci/Btc; python gabung.py"
             key ret                 # Enter
             sleep 60
-            key ctrl-alt-t          # buka terminal
-            sleep 5
-            type_text "source ~/myenv/bin/activate"
-            key ret
-            type_text "cp -R ~/Desktop/fauchet-ci/Btc/tg_profile ~/Desktop/fauchet-ci/Farm"
-            key ret
-            type_text "cd ~/Desktop/fauchet-ci/Farm; python gabung.py 1" # mengerjakan tugas
-            key ret
+          fi
 
-          elif [ "$COUNTER" == "2" ]; then
-            RUN_BY=$RUN_BY$(printf "\n%s\n" "-FarmBody[kerja rodi]")
+          if [ "$COUNTER" == "4" ]; then
+            RUN_BY=$RUN_BY$(printf "\n%s\n" "- FarmBody[kerja rodi]")
 
             key ctrl-alt-t
             sleep 5
@@ -255,19 +256,17 @@ jobs:
             key ret
             type_text "cd ~/Desktop/fauchet-ci/Farm; python gabung.py 5" # kerja rodi
             key ret
+            sleep 60
+          fi
 
-          elif [ "$COUNTER" == "3" ]; then
-            #echo "LANJUT=false" >> "$GITHUB_ENV" # stop loop
+          if [ "$COUNTER" == "4" ]; then
+            RUN_BY=$RUN_BY$(printf "\n%s\n" "- TronBlow")
             key ctrl-alt-t
             sleep 5
             type_text "source ~/myenv/bin/activate"
             key ret
             type_text "cd ~/Desktop/fauchet-ci/Tron; python Tron.py"
             key ret
-
-          else
-            echo "Hari ini sudah jalan, hanya run qemu"
-            echo "$MSG"
           fi
 
           if [ -n "$URL" ]; then
@@ -277,6 +276,8 @@ jobs:
           fi
           curl -s "https://api.telegram.org/bot$CHAT_TOKEN/sendMessage" \
             -d chat_id="$CHAT_ID" --data-urlencode text="$MSG" > /dev/null
+
+          #echo "LANJUT=false" >> "$GITHUB_ENV" # stop loop
 
 
       - name: Tunggu VM mati

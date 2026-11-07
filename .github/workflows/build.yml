@@ -252,7 +252,7 @@ jobs:
             sleep 5
             type_text "source ~/myenv/bin/activate"
             key ret
-            type_text "cp -R ~/fauchet-ci/Btc/tg_profile ~/Desktop/fauchet-ci/Farm"
+            type_text "cp -R ~/fauchet-ci/Farm/tg_profile ~/Desktop/fauchet-ci/Farm"
             key ret
             type_text "cd ~/Desktop/fauchet-ci/Farm; python gabung.py 5" # kerja rodi
             key ret

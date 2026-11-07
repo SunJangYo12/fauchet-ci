@@ -206,8 +206,7 @@ jobs:
           RUN_BY=""
           if [[ "$COUNTER" == "1" ||
                 "$COUNTER" == "2" ||
-                "$COUNTER" == "3" ||
-                "$COUNTER" == "4"
+                "$COUNTER" == "3"
              ]]; then
             RUN_BY=$(printf "\n%s" "-Luckywatch")
 
@@ -281,7 +280,8 @@ jobs:
           alive() { pgrep -x qemu-system-x86 > /dev/null; }
 
           # tunggu kamu shutdown dari dalam VM (maks 4,5 jam, sisakan waktu untuk kompres + upload)
-          for i in $(seq 1 1620); do
+          #for i in $(seq 1 1620); do # untuk save
+          for i in $(seq 1 1980); do # untuk no save 5.5jam
             alive || break
             sleep 10
           done

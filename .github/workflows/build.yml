@@ -259,7 +259,7 @@ jobs:
             sleep 60
           fi
 
-          if [ "$COUNTER" == "5" ]; then
+          if [ "$COUNTER" == "599999999999999999999999999999" ]; then
             RUN_BY=$RUN_BY$(printf "\n%s\n" "- TronBlow")
             key ctrl-alt-t
             sleep 5

@@ -159,6 +159,9 @@ jobs:
 
 
       - name: Ketik perintah ke dalam VM dan buat Trowongan
+        env:
+          SESI_PASSWORD: ${{ secrets.PASS_SESI }}
+
         if: env.MODE == 'boot'
         env:
           RUN_PYTHON: ${{ steps.decide.outputs.run }}
@@ -259,6 +262,24 @@ jobs:
             sleep 60
           fi
 
+
+          if [ "$COUNTER" == "5" ]; then
+            RUN_BY=$RUN_BY$(printf "\n%s\n" "- Clipcon")
+            key ctrl-alt-t
+            sleep 5
+            type_text "source ~/myenv/bin/activate"
+            key ret
+            type_text "cd ~/Desktop/fauchet-ci/Clipcoin; wget 'https://github.com/SunJangYo12/fauchet-ci/releases/download/v1.0.0/tg_profile.7z'"
+            key ret
+            type_text "cd ~/Desktop/fauchet-ci/Clipcoin; 7z x -p$SESI_PASSWORD tg_profile.7z"
+            key ret
+            type_text "cd ~/Desktop/fauchet-ci/Clipcoin; tar xf tg_profile_lengkap.tar"
+            key ret
+            type_text "cd ~/Desktop/fauchet-ci/Clipcoin; python clipc.py"
+            key ret
+          fi
+
+          # terdetect Vpnn
           if [ "$COUNTER" == "599999999999999999999999999999" ]; then
             RUN_BY=$RUN_BY$(printf "\n%s\n" "- TronBlow")
             key ctrl-alt-t

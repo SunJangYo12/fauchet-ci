@@ -29,6 +29,53 @@ BRIGHT_GREEN, NEON_LIME = 115, 118
 SOFT_YELLOW, SOFT_WHITE, SOFT_LIGHT_BLUE = 228, 253, 117
 
 
+
+# ========  AUTO LOGIN ========
+from playwright.sync_api import sync_playwright
+
+def sudah_login(page):
+    return "/home" in page.url
+
+def ambil_cookie():
+    with sync_playwright() as p:
+        ctx = p.chromium.launch_persistent_context(
+            "./tg_profile",
+            channel="chrome",                       # Chrome asli, bukan Chromium bawaan
+            headless=False,
+            viewport={"width": 740, "height": 540},
+            ignore_default_args=["--enable-automation"],
+            args=["--disable-blink-features=AutomationControlled"],
+        )
+        try:
+            page = ctx.pages[0] if ctx.pages else ctx.new_page()
+            page.goto(BASE_URL+"/home")
+            page.wait_for_load_state("networkidle")  # tunggu redirect selesai
+
+            if not sudah_login(page):
+                print("Belum login, silakan login di jendela...")
+                page.wait_for_url("**/home", timeout=300_000)  # tunggu sampai 5 menit
+                print("Login berhasil, sesi tersimpan")
+            else:
+                print("Sudah login.")
+
+                cookies = ctx.cookies(BASE_URL)      # hanya untuk situs tertentu
+
+                # Ubah list of dict menjadi format "nama=nilai; nama2=nilai2"
+                cookie_str = "; ".join(f"{c['name']}={c['value']}" for c in cookies)
+
+                print(cookie_str)
+                return cookie_str
+
+                #with open("cookies.json", "w", encoding="utf-8") as f:
+                #    json.dump(cookies, f, indent=2)
+
+        finally:
+            ctx.close()  # penting: tutup normal supaya sesi tertulis ke disk
+
+# ========  AUTO LOGIN ========
+
+
+
 @dataclass
 class State:
     user: str = "-"
@@ -463,11 +510,13 @@ class ClipCoinBot:
             self.clear_screen()
             self.print_banner()
 
-            value = input(
-                f"{fg(HACK_CYAN)}"
-                "Masukkan Cookie ClipCoin: "
-                f"{RST}"
-            ).strip()
+            value = ambil_cookie()
+
+            #value = input(
+            #    f"{fg(HACK_CYAN)}"
+            #    "Masukkan Cookie ClipCoin: "
+            #    f"{RST}"
+            #).strip()
 
             if not value:
 
@@ -502,7 +551,7 @@ class ClipCoinBot:
             print(f"{fg(BRIGHT_WHITE)}2. Update Cookie{RST}")
             print(f"{fg(BRIGHT_WHITE)}3. Keluar{RST}\n")
 
-            choice = input("▸ Pilih menu: ").strip()
+            choice = "1" #input("▸ Pilih menu: ").strip()
 
             if choice == "1":
 

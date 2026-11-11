@@ -232,7 +232,10 @@ jobs:
           fi
 
 
-          if [[ "$COUNTER" == "1" || "$COUNTER" == "3" ]]; then
+          if [[ "$COUNTER" == "1" ||
+                "$COUNTER" == "3" ||
+                "$COUNTER" == "5"
+             ]]; then
             RUN_BY=$RUN_BY$(printf "\n%s\n" "- BcFauchet")
 
             key ctrl-alt-t          # buka terminal

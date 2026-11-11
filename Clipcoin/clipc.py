@@ -2,6 +2,7 @@
 # Python port of bot.php
 # Dependency: python3 -m pip install requests
 
+import subprocess
 import json
 import os
 import random
@@ -29,9 +30,12 @@ BRIGHT_GREEN, NEON_LIME = 115, 118
 SOFT_YELLOW, SOFT_WHITE, SOFT_LIGHT_BLUE = 228, 253, 117
 
 
+def notify_gagal(msg):
+    subprocess.run(["notify-send", "--urgency=critical", "ClipCoin", msg])
+
 
 # ========  AUTO LOGIN ========
-from playwright.sync_api import sync_playwright
+#from playwright.sync_api import sync_playwright
 
 def sudah_login(page):
     return "/home" in page.url
@@ -359,6 +363,10 @@ class ClipCoinBot:
                     "⚠️ Gagal mendapat task / limit harian habis."
                     f"{RST}"
                 )
+                notify_gagal(f"\n{fg(C_WARN)}"
+                    "⚠️ Gagal mendapat task / limit harian habis."
+                    f"{RST}"
+                )
 
                 input(
                     "Tekan ENTER untuk mencoba lagi, "
@@ -377,6 +385,10 @@ class ClipCoinBot:
 
                 print(
                     f"\n{fg(HACK_CYAN)}"
+                    f"❌ Gagal start task ID: {task_id}"
+                    f"{RST}"
+                )
+                notify_gagal(f"\n{fg(HACK_CYAN)}"
                     f"❌ Gagal start task ID: {task_id}"
                     f"{RST}"
                 )
@@ -496,6 +508,10 @@ class ClipCoinBot:
                     "❌ Klaim gagal atau ditolak server."
                     f"{RST}"
                 )
+                notify_gagal(f"{fg(C_ERR)}"
+                    "❌ Klaim gagal atau ditolak server."
+                    f"{RST}"
+                )
 
                 input("Tekan ENTER untuk melanjutkan...")
 
@@ -510,13 +526,13 @@ class ClipCoinBot:
             self.clear_screen()
             self.print_banner()
 
-            value = ambil_cookie()
+            #value = ambil_cookie()
 
-            #value = input(
-            #    f"{fg(HACK_CYAN)}"
-            #    "Masukkan Cookie ClipCoin: "
-            #    f"{RST}"
-            #).strip()
+            value = input(
+                f"{fg(HACK_CYAN)}"
+                "Masukkan Cookie ClipCoin: "
+                f"{RST}"
+            ).strip()
 
             if not value:
 

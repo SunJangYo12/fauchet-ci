@@ -261,7 +261,7 @@ jobs:
           fi
 
 
-          if [ "$COUNTER" == "5" ]; then
+          if [ "$COUNTER" == "5zzzzzzzzzzzzzzzz" ]; then
             RUN_BY=$RUN_BY$(printf "\n%s\n" "- Clipcon")
             key ctrl-alt-t
             sleep 5

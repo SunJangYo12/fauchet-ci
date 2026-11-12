@@ -44,6 +44,8 @@ jobs:
       COUNTER: 0
 
     steps:
+      - uses: actions/checkout@v4
+
       - name: Restore counter
         uses: actions/cache/restore@v4
         with:
@@ -92,7 +94,7 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
           sudo apt-get update
-          sudo apt-get install -y qemu-system-x86 qemu-utils socat jq
+          sudo apt-get install -y qemu-system-x86 qemu-utils socat jq python3 python3-pip python3-opencv2
           curl -sSL https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz | sudo tar -xz -C /usr/local/bin
           curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
           chmod +x cloudflared
@@ -165,6 +167,7 @@ jobs:
           RUN_PYTHON: ${{ steps.decide.outputs.run }}
           CHAT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           CHAT_ID: "7797309176"
+
         run: |
           ./cloudflared tunnel --no-autoupdate --url tcp://localhost:5900 > tunnel.log 2>&1 &
           sleep 10
@@ -293,8 +296,16 @@ jobs:
             key ret
           fi
 
+          #cpcha service
+          python3 utils/server_cpt.py 2>&1 &
+
+          ./cloudflared tunnel --no-autoupdate --url http://localhost:8080 > ztunnel.log 2>&1 &
+          sleep 10
+          ZURL=$(grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' ztunnel.log | head -1)
+
+
           if [ -n "$URL" ]; then
-            MSG="[VNC-$COUNTER] tiggervnc: $URL $RUN_BY"
+            MSG="[VNC-$COUNTER] tiggervnc: $URL cpcha_service: $ZURL $RUN_BY"
           else
             MSG="[VNC-$COUNTER] GAGAL vnc url $RUN_BY"
           fi

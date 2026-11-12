@@ -262,10 +262,11 @@ class MyHandler(BaseHTTPRequestHandler):
         queue_b64 = params.get("queue_b64", ["Guest"])[0]
         image_b64 = params.get("image_b64", ["Guest"])[0]
 
+
         result = solve_captcha_accurate(queue_b64, image_b64)
 
         # Response text
-        response = result
+        response = f"{result}"
 
         # Mengirim response
         self.send_response(200)

@@ -60,7 +60,7 @@ def ambil_cookie():
 
 
 def api_captcha(q, s):
-    base = "https://minority-era-routine-sounds.trycloudflare.com"
+    base = "https://they-mounting-deluxe-take.trycloudflare.com/"
 
     params = {
         "queue_b64": q,
@@ -69,11 +69,16 @@ def api_captcha(q, s):
     url  = f"{base}/?"+urlencode(params)
 
     print("[+] using api captcha")
-    res = requests.get(url)
-    print(res.text)
+    try:
+        res = requests.get(url)
+        print(res.text)
 
-    data = ast.literal_eval(res.text)
-    return data
+        data = ast.literal_eval(res.text)
+        return data
+    except Exception:
+        print("[!] Error get api url, please update.")
+        exit()
+
 
 
 if hasattr(sys.stdout, 'reconfigure'):

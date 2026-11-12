@@ -206,14 +206,7 @@ jobs:
           type_text "cd ~/Desktop; git clone https://github.com/sunjangyo12/fauchet-ci; git checkout loop-xubuntu22"
           key ret
 
-
-          RUN_BY=""
-          if [[ "$COUNTER" == "1" ||
-                "$COUNTER" == "2" ||
-                "$COUNTER" == "3"
-             ]]; then
-            RUN_BY=$(printf "\n%s\n%s\n" "- Luckywatch" "- FarmBdy[mengerjakan tugas]")
-
+          run_lkywatch() {
             key ctrl-alt-t
             sleep 3
             type_text "source ~/myenv/bin/activate"
@@ -224,15 +217,40 @@ jobs:
             key ret
             type_text "cd ~/Desktop/fauchet-ci; python luckywatch_decrypted.py"
             key ret
-            sleep 60 # tele wajib tunggu lama
+          }
+
+          run_farm() {
             key ctrl-alt-t
             sleep 5
             type_text "source ~/myenv/bin/activate"
             key ret
             type_text "cp -R ~/fauchet-ci/Farm/tg_profile ~/Desktop/fauchet-ci/Farm"
             key ret
-            type_text "cd ~/Desktop/fauchet-ci/Farm; python gabung.py 1" # mengerjakan tugas
+            type_text "cd ~/Desktop/fauchet-ci/Farm; python gabung.py $1"
             key ret
+          }
+
+          run_bcfct() {
+            key ctrl-alt-t          # buka terminal
+            sleep 5
+            type_text "source ~/myenv/bin/activate"
+            key ret                 # Enter
+            type_text "cp -R ~/fauchet-ci/Btc/tg_profile ~/Desktop/fauchet-ci/Btc"
+            key ret                 # Enter
+            type_text "cd ~/Desktop/fauchet-ci/Btc; python gabung.py"
+            key ret                 # Enter
+          }
+
+          RUN_BY=""
+          if [[ "$COUNTER" == "1" ||
+                "$COUNTER" == "2" ||
+                "$COUNTER" == "3"
+             ]]; then
+            RUN_BY=$(printf "\n%s\n%s\n" "- Luckywatch" "- FarmBdy[mengerjakan tugas]")
+
+            run_lkywatch
+            sleep 60 # tele wajib tunggu lama
+            run_farm "1" # mengerjakan tugas
             sleep 60 # tele wajib tunggu lama
           fi
 
@@ -242,30 +260,15 @@ jobs:
                 "$COUNTER" == "5"
              ]]; then
             RUN_BY=$RUN_BY$(printf "\n%s\n" "- BcFauchet")
-
-            key ctrl-alt-t          # buka terminal
-            sleep 5
-            type_text "source ~/myenv/bin/activate"
-            key ret                 # Enter
-            type_text "cp -R ~/fauchet-ci/Btc/tg_profile ~/Desktop/fauchet-ci/Btc"
-            key ret                 # Enter
-            type_text "cd ~/Desktop/fauchet-ci/Btc; python gabung.py"
-            key ret                 # Enter
-            sleep 60
+            run_bcfct
+            sleep 60 # tele wajib tunggu lama
           fi
 
           if [ "$COUNTER" == "4" ]; then
             RUN_BY=$RUN_BY$(printf "\n%s\n" "- FarmBody[kerja rodi]")
 
-            key ctrl-alt-t
-            sleep 5
-            type_text "source ~/myenv/bin/activate"
-            key ret
-            type_text "cp -R ~/fauchet-ci/Farm/tg_profile ~/Desktop/fauchet-ci/Farm"
-            key ret
-            type_text "cd ~/Desktop/fauchet-ci/Farm; python gabung.py 5" # kerja rodi
-            key ret
-            sleep 60
+            run_farm "5" # kerja rodi
+            sleep 60 # tele wajib tunggu lama
           fi
 
 
@@ -283,6 +286,7 @@ jobs:
             key ret
             type_text "cd ~/Desktop/fauchet-ci/Clipcoin; python clipc.py"
             key ret
+            sleep 60 # tele wajib tunggu lama
           fi
 
           # terdetect Vpnn
@@ -294,6 +298,7 @@ jobs:
             key ret
             type_text "cd ~/Desktop/fauchet-ci/Tron; python Tron.py"
             key ret
+            sleep 60 # tele wajib tunggu lama
           fi
 
           #cpcha service

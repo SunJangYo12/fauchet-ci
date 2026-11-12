@@ -215,7 +215,7 @@ jobs:
             key ret
             type_text "cp -R ~/fauchet-ci/tg_profile ~/Desktop/fauchet-ci"
             key ret
-            type_text "cd ~/Desktop/fauchet-ci; python luckywatch_decrypted.py"
+            type_text "cd ~/Desktop/fauchet-ci; python luckywatch_decrypted.py ci"
             key ret
           }
 

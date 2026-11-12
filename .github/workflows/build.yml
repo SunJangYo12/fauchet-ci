@@ -265,7 +265,7 @@ jobs:
                 "$COUNTER" == "2" ||
                 "$COUNTER" == "3"
              ]]; then
-            RUN_BY=$(printf "\n%s\n%s\n" "- Luckywatch" "- FarmBdy[mengerjakan tugas]")
+            RUN_BY=$(printf "\n%s\n%s\n%s\n" "- Luckywatch" "- ClipCoin" "- FarmBdy[mengerjakan tugas]")
 
             run_lkywatch
             sleep 60

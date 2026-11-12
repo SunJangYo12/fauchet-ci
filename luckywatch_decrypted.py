@@ -12,23 +12,6 @@ import unicodedata
 from urllib.parse import urlencode
 import ast
 
-def api_captcha(q, s):
-    base = "https://minority-era-routine-sounds.trycloudflare.com"
-
-    params = {
-        "queue_b64": q,
-        "image_b64": s
-    }
-    url  = f"{base}/?"+urlencode(params)
-
-    print("[+] using api captcha")
-    res = requests.get(url)
-    print(res.text)
-
-    data = ast.literal_eval(res.text)
-    return data
-
-
 # ========  AUTO LOGIN ========
 #from playwright.sync_api import sync_playwright
 import json
@@ -73,6 +56,22 @@ def ambil_cookie():
             ctx.close()  # penting: tutup normal supaya sesi tertulis ke disk
 
 # ========  AUTO LOGIN ========
+
+def api_captcha(q, s):
+    base = "https://minority-era-routine-sounds.trycloudflare.com"
+
+    params = {
+        "queue_b64": q,
+        "image_b64": s
+    }
+    url  = f"{base}/?"+urlencode(params)
+
+    print("[+] using api captcha")
+    res = requests.get(url)
+    print(res.text)
+
+    data = ast.literal_eval(res.text)
+    return data
 
 
 
@@ -794,10 +793,6 @@ class LuckyWatchBot:
                         "coor[1][x]": str(coor[1]["x"]), "coor[1][y]": str(coor[1]["y"]),
                         "coor[2][x]": str(coor[2]["x"]), "coor[2][y]": str(coor[2]["y"]),
                     }
-
-                    print("COOR:", coor)
-                    print("FORM DATA:", form_data)
-                    print(json.dumps(form_data, indent=4))
 
                     time.sleep(0.5)
                     r_sub = self.session.post(self.CLAIM_API, data=form_data, timeout=25)

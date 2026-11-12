@@ -206,6 +206,25 @@ jobs:
           type_text "cd ~/Desktop; git clone https://github.com/sunjangyo12/fauchet-ci; git checkout loop-xubuntu22"
           key ret
 
+          run_clipcon() {
+            key ctrl-alt-t
+            sleep 3
+            type_text "source ~/myenv/bin/activate"
+            key ret
+            type_text "pip install python-opencv2"
+            key ret
+            type_text "wget https://github.com/SunJangYo12/fauchet-ci/releases/download/v1.0.1/tg_profile_clip14.7z"
+            key ret
+            type_text "7z x -p$SESI_PASSWORD tg_profile_clip14.7z"
+            key ret
+            type_text "tar xf tg_profile_clip14.tar"
+            key ret
+            type_text "cp -R tg_profile ~/Desktop/fauchet-ci/Clipcoin"
+            key ret
+            type_text "cd ~/Desktop/fauchet-ci/Clipcoin; python fix_captcha.py ci"
+            key ret
+          }
+
           run_lkywatch() {
             key ctrl-alt-t
             sleep 3
@@ -249,9 +268,11 @@ jobs:
             RUN_BY=$(printf "\n%s\n%s\n" "- Luckywatch" "- FarmBdy[mengerjakan tugas]")
 
             run_lkywatch
-            sleep 60 # tele wajib tunggu lama
+            sleep 60
+            run_clipcon
+            sleep 60
             run_farm "1" # mengerjakan tugas
-            sleep 60 # tele wajib tunggu lama
+            sleep 60
           fi
 
 

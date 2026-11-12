@@ -12,8 +12,14 @@ import unicodedata
 from urllib.parse import urlencode
 import ast
 
+CMD = None
+if len(sys.argv) > 1:
+    CMD = sys.argv[1] #ci untuk auto login dan solve cathah langsung tanpa api
+
 # ========  AUTO LOGIN ========
-#from playwright.sync_api import sync_playwright
+if CMD == "ci":
+    from playwright.sync_api import sync_playwright
+
 import json
 
 URL = "https://luckywatch.pro/home"
@@ -58,7 +64,7 @@ def ambil_cookie():
 # ========  AUTO LOGIN ========
 
 def api_captcha(q, s):
-    base = "https://they-mounting-deluxe-take.trycloudflare.com/"
+    base = "https://specialist-focal-achievement-bloomberg.trycloudflare.com"
 
     params = {
         "queue_b64": q,
@@ -568,8 +574,11 @@ class LuckyWatchBot:
             print(box_end() + RESET + "\n")
 
             while not self.session_hash:
-                raw_in = input(f"{G}  → cookie / hash: ").strip()
-                #raw_in = ambil_cookie()
+                if CMD == "ci":
+                    raw_in = ambil_cookie()
+                else:
+                    raw_in = input(f"{G}  → cookie / hash: ").strip()
+
                 self._parse_and_set_cookies(raw_in)
                 if not self.session_hash:
                     print(f"    {R}Cookies cannot be empty!{RESET}")
@@ -787,8 +796,10 @@ class LuckyWatchBot:
                     if not q_b64 or not img_b64:
                         break
 
-                    #coor = self.solve_pattern_captcha(q_b64, img_b64)
-                    coor = api_captcha(q_b64, img_b64)
+                    if CMD == "ci":
+                        coor = self.solve_pattern_captcha(q_b64, img_b64)
+                    else:
+                        coor = api_captcha(q_b64, img_b64)
 
                     if not coor:
                         break

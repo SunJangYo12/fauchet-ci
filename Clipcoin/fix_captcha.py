@@ -10,7 +10,8 @@ import struct
 import math
 import unicodedata
 
-
+from urllib.parse import urlencode
+import ast
 
 # ========  AUTO LOGIN ========
 #from playwright.sync_api import sync_playwright
@@ -59,14 +60,20 @@ def ambil_cookie():
 
 
 def api_captcha(q, s):
-    base = "https://sdsd"
-    url  = f"{base}/?queue_b64={q}&image_b64={s}"
+    base = "https://minority-era-routine-sounds.trycloudflare.com"
+
+    params = {
+        "queue_b64": q,
+        "image_b64": s
+    }
+    url  = f"{base}/?"+urlencode(params)
 
     print("[+] using api captcha")
     res = requests.get(url)
     print(res.text)
 
-    return res.txt
+    data = ast.literal_eval(res.text)
+    return data
 
 
 if hasattr(sys.stdout, 'reconfigure'):

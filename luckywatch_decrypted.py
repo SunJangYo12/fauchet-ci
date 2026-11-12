@@ -9,11 +9,28 @@ import zlib
 import struct
 import math
 import unicodedata
+from urllib.parse import urlencode
+import ast
 
+def api_captcha(q, s):
+    base = "https://minority-era-routine-sounds.trycloudflare.com"
+
+    params = {
+        "queue_b64": q,
+        "image_b64": s
+    }
+    url  = f"{base}/?"+urlencode(params)
+
+    print("[+] using api captcha")
+    res = requests.get(url)
+    print(res.text)
+
+    data = ast.literal_eval(res.text)
+    return data
 
 
 # ========  AUTO LOGIN ========
-from playwright.sync_api import sync_playwright
+#from playwright.sync_api import sync_playwright
 import json
 
 URL = "https://luckywatch.pro/home"
@@ -223,8 +240,14 @@ def solve_captcha_accurate(queue_b64, image_b64):
         q_bytes = base64.b64decode(queue_b64.split(",")[-1])
         s_bytes = base64.b64decode(image_b64.split(",")[-1])
 
+
         q_img = Image.open(io.BytesIO(q_bytes))
         s_img = Image.open(io.BytesIO(s_bytes))
+
+        q_img.save("/dev/shm/q.png")
+        s_img.save("/dev/shm/s.png")
+
+        print("[+] Process image...")
 
         scene = cv2.cvtColor(np.array(s_img.convert("RGB")), cv2.COLOR_RGB2BGR)
         sw, sh = s_img.width, s_img.height
@@ -359,6 +382,8 @@ def solve_captcha_accurate(queue_b64, image_b64):
             fx = max(8, min(fx, sw - 8))
             fy = max(8, min(fy, sh - 8))
             clicks.append({"x": fx, "y": fy})
+
+        print("[+] Done.")
         return clicks
 
     except ImportError:
@@ -539,8 +564,8 @@ class LuckyWatchBot:
             print(box_end() + RESET + "\n")
 
             while not self.session_hash:
-                #raw_in = input(f"{G}  → cookie / hash: ").strip()
-                raw_in = ambil_cookie()
+                raw_in = input(f"{G}  → cookie / hash: ").strip()
+                #raw_in = ambil_cookie()
                 self._parse_and_set_cookies(raw_in)
                 if not self.session_hash:
                     print(f"    {R}Cookies cannot be empty!{RESET}")
@@ -750,13 +775,17 @@ class LuckyWatchBot:
                 round_num = 1
                 print(f"  {G}Solving captcha...{RESET}")
                 while claim_data.get("status") == "data" and round_num <= 5:
+
                     data_obj = claim_data.get("data", {})
                     q_b64 = data_obj.get("queue")
                     img_b64 = data_obj.get("image")
+
                     if not q_b64 or not img_b64:
                         break
 
-                    coor = self.solve_pattern_captcha(q_b64, img_b64)
+                    #coor = self.solve_pattern_captcha(q_b64, img_b64)
+                    coor = api_captcha(q_b64, img_b64)
+
                     if not coor:
                         break
 
@@ -765,8 +794,13 @@ class LuckyWatchBot:
                         "coor[1][x]": str(coor[1]["x"]), "coor[1][y]": str(coor[1]["y"]),
                         "coor[2][x]": str(coor[2]["x"]), "coor[2][y]": str(coor[2]["y"]),
                     }
+
+                    print("COOR:", coor)
+                    print("FORM DATA:", form_data)
+                    print(json.dumps(form_data, indent=4))
+
                     time.sleep(0.5)
-                    r_sub = self.session.post(self.CLAIM_API, data=form_data, timeout=15)
+                    r_sub = self.session.post(self.CLAIM_API, data=form_data, timeout=25)
                     claim_data = r_sub.json()
                     round_num += 1
 

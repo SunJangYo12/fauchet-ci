@@ -94,7 +94,7 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
           sudo apt-get update
-          sudo apt-get install -y qemu-system-x86 qemu-utils socat jq python3 python3-pip python3-opencv2
+          sudo apt-get install -y qemu-system-x86 qemu-utils socat jq python3 python3-pip
           curl -sSL https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz | sudo tar -xz -C /usr/local/bin
           curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
           chmod +x cloudflared
@@ -297,6 +297,7 @@ jobs:
           fi
 
           #cpcha service
+          pip3 install python-opencv2
           python3 utils/server_cpt.py 2>&1 &
 
           ./cloudflared tunnel --no-autoupdate --url http://localhost:8080 > ztunnel.log 2>&1 &

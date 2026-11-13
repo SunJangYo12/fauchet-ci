@@ -211,8 +211,6 @@ jobs:
             sleep 3
             type_text "source ~/myenv/bin/activate"
             key ret
-            type_text "pip install python-opencv2"
-            key ret
             type_text "wget https://github.com/SunJangYo12/fauchet-ci/releases/download/v1.0.1/tg_profile_clip14.7z"
             key ret
             type_text "7z x -p$SESI_PASSWORD tg_profile_clip14.7z"
@@ -267,7 +265,7 @@ jobs:
              ]]; then
             RUN_BY=$(printf "\n%s\n%s\n%s\n" "- Luckywatch" "- ClipCoin" "- FarmBdy[mengerjakan tugas]")
 
-            run_lkywatch
+            #run_lkywatch
             sleep 60
             run_clipcon
             sleep 60

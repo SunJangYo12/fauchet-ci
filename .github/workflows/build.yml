@@ -247,6 +247,17 @@ jobs:
             key ret
           }
 
+          run_goldbtc() {
+            key ctrl-alt-t          # buka terminal
+            sleep 5
+            type_text "source ~/myenv/bin/activate"
+            key ret                 # Enter
+            type_text "cp -R ~/fauchet-ci/Farm/tg_profile ~/Desktop/fauchet-ci/Gold"
+            key ret                 # Enter
+            type_text "cd ~/Desktop/fauchet-ci/Gold; python mine.py"
+            key ret                 # Enter
+          }
+
           run_bcfct() {
             key ctrl-alt-t          # buka terminal
             sleep 5
@@ -284,11 +295,13 @@ jobs:
           fi
 
           if [ "$COUNTER" == "4" ]; then
-            RUN_BY=$RUN_BY$(printf "\n%s\n%s\n" "- FarmBody[kerja rodi]" "- BtcFachet")
+            RUN_BY=$RUN_BY$(printf "\n%s\n%s\n%s\n" "- FarmBody[kerja rodi]" "- BtcFachet" "- Gold minn")
 
             run_farm "5" # kerja rodi
             sleep 60
             run_bcfct
+            sleep 60
+            run_goldbtc
             sleep 60
           fi
 

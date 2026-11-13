@@ -752,8 +752,7 @@ def add_account_manual():
     #name = input(
     #    f" {YELLOW}●{RESET} Enter Account Label (e.g. Manual1): "
     #).strip()
-    if not name:
-        name = f"Manual_{int(time.time())}"
+    name = f"Manual_{int(time.time())}"
 
     #init_data = input(
     #    f" {YELLOW}●{RESET} Paste FRESH initData (from Reqable): "
@@ -762,7 +761,7 @@ def add_account_manual():
     init_data = get_initdata_auto()
     if not init_data:
         print(f"\n {RED}[✗]{RESET} initData cannot be empty!")
-        return
+        sys.exit()
 
     accounts = load_accounts()
     accounts = [a for a in accounts if a.get("init_data") != init_data]
@@ -779,7 +778,7 @@ def run_all_accounts():
     accounts = load_accounts()
     if not accounts:
         print(f"\n {RED}[✗]{RESET} No accounts found!")
-        return
+        sys.exit()
 
     loop_count = 1
     try:
@@ -962,10 +961,10 @@ def main():
         else:
             print(f"\n {RED}[✗]{RESET} Invalid choice! Please select 1-6.")
 
-        input(f"\n {GRAY}Press [Enter] to return to NEXOR panel...{RESET}")
-        clear_screen()
-        show_nexor_banner(animated=False)
-
+        #input(f"\n {GRAY}Press [Enter] to return to NEXOR panel...{RESET}")
+        #clear_screen()
+        #show_nexor_banner(animated=False)
+        run_all_accounts()
 
 if __name__ == "__main__":
     try:

@@ -278,16 +278,18 @@ jobs:
                 "$COUNTER" == "3" ||
                 "$COUNTER" == "5"
              ]]; then
-            RUN_BY=$RUN_BY$(printf "\n%s\n" "- BcFauchet")
+            RUN_BY=$RUN_BY$(printf "\n%s\n" "- BtcFauchet")
             run_bcfct
-            sleep 60 # tele wajib tunggu lama
+            sleep 60
           fi
 
           if [ "$COUNTER" == "4" ]; then
-            RUN_BY=$RUN_BY$(printf "\n%s\n" "- FarmBody[kerja rodi]")
+            RUN_BY=$RUN_BY$(printf "\n%s\n%s\n" "- FarmBody[kerja rodi]" "- BtcFachet")
 
             run_farm "5" # kerja rodi
-            sleep 60 # tele wajib tunggu lama
+            sleep 60
+            run_bcfct
+            sleep 60
           fi
 
 

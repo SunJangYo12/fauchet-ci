@@ -203,7 +203,7 @@ jobs:
 
           key ctrl-alt-t
           sleep 5
-          type_text "cd ~/Desktop; git clone https://github.com/sunjangyo12/fauchet-ci; git checkout loop-xubuntu22"
+          type_text "cd ~/Desktop; rm -rf fauchet-ci; git clone https://github.com/sunjangyo12/fauchet-ci; git checkout loop-xubuntu22"
           key ret
 
           run_clipcon() {

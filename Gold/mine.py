@@ -19,6 +19,183 @@ import urllib.parse
 from datetime import datetime
 import requests
 
+
+# ═══════════════════ TELEGRAM WEB INITDATA ═══════════════════
+# Samakan BOT/PEER_ID/NAMA_CHAT dengan bot dan chat Mini App milik Anda.
+TG_BOT = "8904034021"          # username bot tanpa @
+TG_APP = ""                  # short name Mini App; kosong = buka dari tombol chat
+TG_START = ""                # startapp opsional
+TG_TIMEOUT = 60
+TG_PEER_ID = "8904034021"
+TG_CHAT_NAME = "CryptoGold Mine"
+TG_PROFILE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tg_profile")
+
+TG_WEB_PATCH = r"""
+(() => {
+  if (location.hash.includes('tgWebAppPlatform=')) {
+    const h = location.hash.replace(/tgWebAppPlatform=[^&]*/, 'tgWebAppPlatform=android');
+    history.replaceState(null, '', location.pathname + location.search + h);
+  }
+})();
+"""
+
+
+def cari_init_data(ctx, verbose=False):
+    """Ambil initData dari URL/frame atau Telegram WebApp runtime."""
+    for pg in ctx.pages:
+        for fr in pg.frames:
+            if verbose:
+                print(f"{GRAY}[TG] frame: {fr.url[:120]}{RESET}")
+            try:
+                if "tgWebAppData" in fr.url:
+                    val = parse_qs(urlparse(fr.url).fragment).get("tgWebAppData")
+                    if val and val[0]:
+                        return val[0]
+            except Exception:
+                pass
+            try:
+                val = fr.evaluate("window.Telegram?.WebApp?.initData")
+                if val:
+                    return val
+            except Exception:
+                pass
+            try:
+                raw = fr.evaluate("sessionStorage.getItem('__telegram__initParams')")
+                if raw:
+                    val = json.loads(raw).get("tgWebAppData")
+                    if val:
+                        return val
+            except Exception:
+                pass
+    return None
+
+
+def masuk_chat_telegram(page):
+    try:
+        page.wait_for_selector("a.chatlist-chat", timeout=30000)
+    except Exception:
+        pass
+    kandidat = [
+        page.locator(f'a.chatlist-chat[data-peer-id="{TG_PEER_ID}"] .peer-title'),
+        page.locator("a.chatlist-chat", has_text=TG_CHAT_NAME).locator(".peer-title"),
+    ]
+    for loc in kandidat:
+        try:
+            loc.first.click(timeout=5000)
+            return True
+        except Exception:
+            pass
+    try:
+        search = page.locator(".input-search-input").first
+        search.click(timeout=5000)
+        search.fill(TG_BOT)
+        page.wait_for_timeout(1500)
+        page.locator(f'a[data-peer-id="{TG_PEER_ID}"]').first.click(timeout=5000)
+        return True
+    except Exception:
+        return False
+
+
+def buka_mini_app_telegram(page):
+    if TG_APP:
+        addr = f"tg://resolve?domain={TG_BOT}&appname={TG_APP}"
+        if TG_START:
+            addr += f"&startapp={TG_START}"
+        page.goto("https://web.telegram.org/k/#?tgaddr=" + quote(addr, safe=""))
+    else:
+        if not masuk_chat_telegram(page):
+            print(f"{YELLOW}[TG] Chat belum terbuka otomatis; silakan buka chat bot di jendela Telegram Web.{RESET}")
+        try:
+            page.wait_for_selector(
+                ".new-message-bot-commands.is-view, button.reply-markup-button.is-web-view",
+                timeout=20000,
+            )
+        except Exception:
+            pass
+        kandidat = [
+            page.locator(".new-message-bot-commands.is-view"),
+            page.locator("button.reply-markup-button.is-web-view").last,
+            page.locator("button.peer-profile-open-app-button"),
+        ]
+        for loc in kandidat:
+            try:
+                loc.first.click(timeout=5000)
+                break
+            except Exception:
+                continue
+    try:
+        page.get_by_role("button", name=re.compile(r"^(launch|open|confirm|Mine)", re.I)).first.click(timeout=4000)
+    except Exception:
+        pass
+
+
+def get_initdata_auto():
+    """Buka Telegram Web dengan profil persisten dan kembalikan initData di memori."""
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError:
+        print(f"{RED}[TG] Playwright belum terpasang. Jalankan: pip install playwright{RESET}")
+        print(f"{GRAY}Lalu pasang browser: playwright install chromium{RESET}")
+        return None
+
+    ctx = None
+    try:
+        print(f"{WHITE}[TG] Membuka Telegram Web (profil: {TG_PROFILE_DIR})...{RESET}")
+        with sync_playwright() as pw:
+            device = pw.devices.get("Pixel 7", {})
+            launch_args = ["--window-size=460,800", "--window-position=0,0"]
+            kwargs = {
+                "user_data_dir": TG_PROFILE_DIR,
+                "headless": False,
+                "no_viewport": True,
+                "args": launch_args,
+            }
+            if device.get("user_agent"):
+                kwargs["user_agent"] = device["user_agent"]
+            ctx = pw.chromium.launch_persistent_context(**kwargs)
+            ctx.add_init_script(TG_WEB_PATCH)
+            page = ctx.pages[0] if ctx.pages else ctx.new_page()
+            page.goto("https://web.telegram.org/k/", wait_until="domcontentloaded", timeout=60000)
+            page.wait_for_timeout(4000)
+            if page.locator("canvas, .qr-container, input[type=tel]").count() > 0:
+                print(f"{YELLOW}[TG] Telegram Web belum login. Login di jendela browser yang terbuka; menunggu...{RESET}")
+                deadline = time.time() + TG_TIMEOUT
+                while time.time() < deadline:
+                    try:
+                        if page.locator("a.chatlist-chat").count() > 0:
+                            break
+                    except Exception:
+                        pass
+                    page.wait_for_timeout(1000)
+
+            page.add_locator_handler(
+                page.get_by_role("button", name="Launch"),   # sesuaikan teks tombolnya Launch/Cancel
+                lambda btn: btn.click()
+            )
+
+            buka_mini_app_telegram(page)
+            deadline = time.time() + TG_TIMEOUT
+            while time.time() < deadline:
+                value = cari_init_data(ctx)
+                if value:
+                    return value
+                page.wait_for_timeout(1500)
+            print(f"{RED}[TG] initData tidak ditemukan dalam {TG_TIMEOUT} detik.{RESET}")
+            cari_init_data(ctx, verbose=True)
+            return None
+    except Exception as exc:
+        print(f"{RED}[TG] Gagal mengambil initData: {type(exc).__name__}: {exc}{RESET}")
+        return None
+    finally:
+        if ctx is not None:
+            try:
+                ctx.close()
+            except Exception:
+                pass
+# ================= auto login =================
+
+
+
 # ==================== [ LOGGING & SILENCER ] ====================
 logging.getLogger("telethon").setLevel(logging.WARNING)
 logging.getLogger("asyncio").setLevel(logging.WARNING)

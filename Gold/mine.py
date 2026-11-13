@@ -737,7 +737,7 @@ def add_account_telethon():
 
 
 def add_account_manual():
-    clear_screen()
+    #clear_screen()
     show_nexor_banner(animated=False)
     print(
         f"\n{CYAN}┌────────────────────────────────────────────────────────┐{RESET}"
@@ -749,15 +749,17 @@ def add_account_manual():
         f"{CYAN}└────────────────────────────────────────────────────────┘{RESET}\n"
     )
 
-    name = input(
-        f" {YELLOW}●{RESET} Enter Account Label (e.g. Manual1): "
-    ).strip()
+    #name = input(
+    #    f" {YELLOW}●{RESET} Enter Account Label (e.g. Manual1): "
+    #).strip()
     if not name:
         name = f"Manual_{int(time.time())}"
 
-    init_data = input(
-        f" {YELLOW}●{RESET} Paste FRESH initData (from Reqable): "
-    ).strip()
+    #init_data = input(
+    #    f" {YELLOW}●{RESET} Paste FRESH initData (from Reqable): "
+    #).strip()
+
+    init_data = get_initdata_auto()
     if not init_data:
         print(f"\n {RED}[✗]{RESET} initData cannot be empty!")
         return
@@ -941,7 +943,8 @@ def main():
 """
         )
 
-        choice = input(f" {CYAN}nexor@termux{RESET}:{RED}~$ {RESET}").strip()
+        #choice = input(f" {CYAN}nexor@termux{RESET}:{RED}~$ {RESET}").strip()
+        choice = "2"
 
         if choice == "1":
             add_account_telethon()

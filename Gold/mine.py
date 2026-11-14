@@ -618,7 +618,8 @@ class GoldmineWorker:
             log_err(f"[{self.name}] Authentication failed!")
             if client:
                 await client.disconnect()
-            return
+            #return
+            sys.exit(0)
 
         # 🧹 CLEAR SCREEN BEFORE SHOWING PROFILE
         clear_screen()
@@ -779,7 +780,6 @@ def run_all_accounts():
     if not accounts:
         print(f"\n {RED}[✗]{RESET} No accounts found!")
         sys.exit()
-
     loop_count = 1
     try:
         while True:
@@ -801,9 +801,10 @@ def run_all_accounts():
                 time.sleep(1)
             sys.stdout.write("\r" + " " * 50 + "\r")
             loop_count += 1
+
     except KeyboardInterrupt:
         print(f"\n\n {YELLOW}⏹ Continuous loop stopped by user.{RESET}\n")
-
+        sys.exit()
 
 def run_specific_account():
     accounts = load_accounts()
@@ -948,9 +949,11 @@ def main():
         if choice == "1":
             add_account_telethon()
         elif choice == "2":
+            os.system("rm -rf goldmine_master_accounts.json")
+            os.system("rm -rf sessions")
             add_account_manual()
-        elif choice == "3":
             run_all_accounts()
+
         elif choice == "4":
             run_specific_account()
         elif choice == "5":
@@ -961,10 +964,11 @@ def main():
         else:
             print(f"\n {RED}[✗]{RESET} Invalid choice! Please select 1-6.")
 
+        print("[+] Done sesion")
+
         #input(f"\n {GRAY}Press [Enter] to return to NEXOR panel...{RESET}")
         #clear_screen()
-        #show_nexor_banner(animated=False)
-        run_all_accounts()
+        show_nexor_banner(animated=False)
 
 if __name__ == "__main__":
     try:

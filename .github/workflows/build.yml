@@ -254,7 +254,7 @@ jobs:
             key ret                 # Enter
             type_text "cp -R ~/fauchet-ci/Farm/tg_profile ~/Desktop/fauchet-ci/Gold"
             key ret                 # Enter
-            type_text "cd ~/Desktop/fauchet-ci/Gold; python mine.py"
+            type_text "cd ~/Desktop/fauchet-ci/Gold; bash run.sh"
             key ret                 # Enter
           }
 
@@ -291,6 +291,8 @@ jobs:
              ]]; then
             RUN_BY=$RUN_BY$(printf "\n%s\n" "- BtcFauchet")
             run_bcfct
+            sleep 60
+            run_goldbtc
             sleep 60
           fi
 
